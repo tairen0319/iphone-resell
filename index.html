@@ -387,7 +387,7 @@ const rate       = souba > 0 ? Math.round(profit / souba * 1000) / 10 : 0;
   document.getElementById('r-souba').textContent = fmt(souba);
   document.getElementById('r-fee').textContent   = fmt(fee);
   document.getElementById('r-ship').textContent  = fmt(shipping);
-  document.getElementById('r-bat').textContent   = fmt(battery + screenCost);
+  document.getElementById('r-bat').textContent   = fmt(battery + screenCost + partsSending + accessories);
   document.getElementById('r-pur').textContent   = fmt(price);
   document.getElementById('r-cost').textContent  = fmt(totalCost);
 

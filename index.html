@@ -371,13 +371,16 @@ window.calcProfit = function() {
   if (!found) { showToast('❌ 相場データがありません'); return; }
 
   const souba      = found.souba;
-  const battery    = found.battery || 3500;
-  const shipping   = found.shipping || 520;
-  const screenCost = screen === 'あり' ? 4000 : 0;
-  const fee        = Math.ceil(souba * 0.1);
-  const totalCost  = price + battery + screenCost + fee + shipping;
-  const profit     = souba - totalCost;
-  const rate       = souba > 0 ? Math.round(profit / souba * 1000) / 10 : 0;
+const battery    = found.battery || 0;
+const shipping   = found.shipping || 520;
+const screenCost = screen === 'あり' ? (found.frontPanel || 0) : 0;
+const partsSending = found.partsSending || 0;
+const accessories  = found.accessories || 0;
+const fee        = Math.ceil(souba * 0.1);
+const totalCost  = price + battery + screenCost + partsSending + accessories + fee + shipping;
+const profit     = souba - totalCost;
+const rate       = souba > 0 ? Math.round(profit / souba * 1000) / 10 : 0;
+
 
   lastCalc = {model, cap, screen, price, souba, battery, shipping, screenCost, fee, totalCost, profit, rate};
 

@@ -76,6 +76,27 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
 .sum-item{text-align:center;}
 .sum-num{font-size:20px;font-weight:700;color:#FF8F00;}
 .sum-lbl{font-size:11px;color:#888;margin-top:2px;}
+/* タブ */
+.tab-bar{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px;}
+.tab-btn{flex-shrink:0;padding:8px 14px;border:none;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;background:#f0f0f0;color:#666;}
+.tab-btn.active{background:#2E7D32;color:white;}
+/* ランキング行 */
+.rank-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:13px;}
+.rank-row:last-child{border-bottom:none;}
+.rank-num{font-size:16px;font-weight:800;color:#aaa;width:24px;flex-shrink:0;}
+.rank-num.gold{color:#F9A825;}
+.rank-num.silver{color:#9E9E9E;}
+.rank-num.bronze{color:#A1887F;}
+.rank-label{flex:1;margin:0 10px;}
+.rank-val{font-weight:700;color:#2E7D32;font-size:13px;}
+/* 月別・週別行 */
+.period-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:13px;}
+.period-row:last-child{border-bottom:none;}
+.period-label{font-weight:600;color:#333;}
+.period-sub{font-size:11px;color:#888;margin-top:2px;}
+.period-right{text-align:right;}
+.period-profit{font-weight:700;color:#2E7D32;font-size:14px;}
+.period-count{font-size:11px;color:#888;}
 .modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;}
 .modal-overlay.show{display:flex;}
 .modal{background:white;border-radius:16px;padding:24px;width:90%;max-width:400px;max-height:90vh;overflow-y:auto;}
@@ -84,8 +105,7 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
 .modal-btns button{flex:1;padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;}
 .modal-ok{background:#2E7D32;color:white;}
 .modal-cancel{background:#f0f0f0;color:#666;}
-/* テンプレモーダル専用 */
-.template-output{width:100%;height:320px;padding:12px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:12px;background:#fafafa;font-family:inherit;resize:none;line-height:1.6;}
+.template-output{width:100%;height:300px;padding:12px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:12px;background:#fafafa;font-family:inherit;resize:none;line-height:1.6;}
 .copy-btn{width:100%;padding:14px;background:#7B1FA2;color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;}
 .copy-btn.copied{background:#2E7D32;}
 .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#333;color:white;padding:12px 24px;border-radius:24px;font-size:14px;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;}
@@ -199,10 +219,12 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
   </div>
 </div>
 
-<!-- 出品テンプレモーダル ★新規追加 -->
+<!-- 出品テンプレモーダル -->
 <div class="modal-overlay" id="templateModal">
   <div class="modal">
     <h3>📝 出品テンプレ生成</h3>
+    <label>IMEI</label>
+    <input type="text" id="tmpl-imei" placeholder="例：354123456789012" inputmode="numeric">
     <label>画面の状態</label>
     <input type="text" id="tmpl-screen" placeholder="例：傷や汚れなし">
     <label>本体の傷</label>
@@ -418,12 +440,14 @@ function renderZaiko() {
   document.getElementById('z-days').textContent   = Math.round(totalDays / zaikoList.length) + '日';
 }
 
-// ========== 出品テンプレ ★新規 ==========
+// ========== 出品テンプレ ==========
 window.openTemplateModal = function(docId) {
   templateItem = zaikoList.find(r => r.docId === docId);
   if (!templateItem) return;
+  // IMEIが登録済みなら自動入力
+  document.getElementById('tmpl-imei').value   = templateItem.imei || '';
   document.getElementById('tmpl-screen').value = '';
-  document.getElementById('tmpl-body').value = '';
+  document.getElementById('tmpl-body').value   = '';
   document.getElementById('tmpl-result').style.display = 'none';
   document.getElementById('tmpl-copy-btn').textContent = '📋 コピーする';
   document.getElementById('tmpl-copy-btn').classList.remove('copied');
@@ -436,11 +460,12 @@ window.closeTemplateModal = function() {
 
 window.generateTemplate = function() {
   if (!templateItem) return;
+  const imei        = document.getElementById('tmpl-imei').value   || '【IMEIを入力】';
   const screenState = document.getElementById('tmpl-screen').value || '【画面の状態を入力（例：傷や汚れなし）】';
   const bodyState   = document.getElementById('tmpl-body').value   || '【本体の傷を入力（例：右下角に若干の擦り傷あり）】';
-  const imei = templateItem.imei || '【IMEIを入力】';
 
-  const text = `■ フォロー割実施中！
+  const text =
+`■ フォロー割実施中！
 『購入前』にフォローして、『フォロー割希望』とコメントして下さい！
 300円のお値引きをさせていただきます。
 ■ 他にもiPhone端末本体出品中！
@@ -483,10 +508,7 @@ window.copyTemplate = function() {
     const btn = document.getElementById('tmpl-copy-btn');
     btn.textContent = '✅ コピーしました！';
     btn.classList.add('copied');
-    setTimeout(() => {
-      btn.textContent = '📋 コピーする';
-      btn.classList.remove('copied');
-    }, 2500);
+    setTimeout(() => { btn.textContent = '📋 コピーする'; btn.classList.remove('copied'); }, 2500);
   });
 };
 
@@ -514,10 +536,10 @@ window.applyStatus = async function() {
   if (isSellMode) {
     const sellPrice = Number(document.getElementById('modal-sell-price').value);
     if (!sellPrice || sellPrice <= 0) { showToast('⚠️ 売却価格を入力してください'); return; }
-    const fee     = Math.ceil(sellPrice * 0.1);
+    const fee      = Math.ceil(sellPrice * 0.1);
     const shipping = 520;
-    const profit  = sellPrice - fee - shipping - item.purchasePrice - (item.partsCost || 0);
-    const now     = new Date();
+    const profit   = sellPrice - fee - shipping - item.purchasePrice - (item.partsCost || 0);
+    const now      = new Date();
     await addDoc(collection(db, 'uriage'), {
       date: now.toISOString().slice(0,10),
       invId: item.invId, model: item.model, capacity: item.capacity,
@@ -538,6 +560,8 @@ window.applyStatus = async function() {
 };
 
 // ========== 売上サマリー ==========
+let urageTab = 'summary';
+
 window.loadUriage = async function() {
   document.getElementById('u-content').innerHTML = '<div class="loading">⏳ 読み込み中...</div>';
   const snap = await getDocs(query(collection(db, 'uriage'), orderBy('createdAt', 'desc')));
@@ -547,30 +571,145 @@ window.loadUriage = async function() {
     document.getElementById('u-content').innerHTML = '<div class="empty">💰 売上データがありません</div>';
     return;
   }
+  renderUriage(list, urageTab);
+};
+
+function renderUriage(list, tab) {
   const totalSales  = list.reduce((s,r) => s + r.sellPrice, 0);
   const totalProfit = list.reduce((s,r) => s + r.profit, 0);
   const avgRate     = list.reduce((s,r) => s + r.profitRate, 0) / list.length;
-  const profits     = list.map(r => r.profit);
-  let html = `<div class="kpi-grid">
-    <div class="kpi-card full highlight"><div class="kpi-num">${fmt(totalProfit)}</div><div class="kpi-lbl">🎯 純利益合計</div></div>
-    <div class="kpi-card"><div class="kpi-num" style="color:#1565C0">${list.length}件</div><div class="kpi-lbl">総売上件数</div></div>
-    <div class="kpi-card"><div class="kpi-num" style="color:#1565C0">${fmt(totalSales)}</div><div class="kpi-lbl">総売上高</div></div>
-    <div class="kpi-card"><div class="kpi-num">${Math.round(avgRate*1000)/10}%</div><div class="kpi-lbl">📈 平均利益率</div></div>
-    <div class="kpi-card"><div class="kpi-num">${fmt(Math.max(...profits))}</div><div class="kpi-lbl">💎 最高利益</div></div>
-    <div class="kpi-card"><div class="kpi-num" style="${Math.min(...profits)<0?'color:#C62828':''}">${fmt(Math.min(...profits))}</div><div class="kpi-lbl">📉 最低利益</div></div>
-  </div>
-  <div style="font-size:14px;font-weight:700;color:#444;margin-bottom:10px">📋 直近の売上履歴</div>`;
-  html += list.slice(0,20).map(r => `
-    <div class="item-card" style="border-left-color:#2E7D32">
-      <div class="item-top">
-        <div><div class="item-model">${r.model} ${r.capacity}</div><div class="item-id">${r.date} | ${r.invId}</div></div>
-        <div style="text-align:right">
-          <div class="item-profit ${r.profit<0?'neg':''}">${fmt(r.profit)}</div>
-          <div style="font-size:11px;color:#888">${Math.round(r.profitRate*1000)/10}%</div>
+
+  const tabBar = `<div class="tab-bar">
+    <button class="tab-btn ${tab==='summary'?'active':''}"  onclick="switchUriageTab('summary')">📊 サマリー</button>
+    <button class="tab-btn ${tab==='monthly'?'active':''}"  onclick="switchUriageTab('monthly')">📅 月別</button>
+    <button class="tab-btn ${tab==='weekly'?'active':''}"   onclick="switchUriageTab('weekly')">📅 週別</button>
+    <button class="tab-btn ${tab==='model'?'active':''}"    onclick="switchUriageTab('model')">📱 機種別</button>
+    <button class="tab-btn ${tab==='profit'?'active':''}"   onclick="switchUriageTab('profit')">💰 利益額</button>
+  </div>`;
+
+  let body = '';
+
+  if (tab === 'summary') {
+    const profits = list.map(r => r.profit);
+    body = `<div class="kpi-grid">
+      <div class="kpi-card full highlight"><div class="kpi-num">${fmt(totalProfit)}</div><div class="kpi-lbl">🎯 純利益合計</div></div>
+      <div class="kpi-card"><div class="kpi-num" style="color:#1565C0">${list.length}件</div><div class="kpi-lbl">総売上件数</div></div>
+      <div class="kpi-card"><div class="kpi-num" style="color:#1565C0">${fmt(totalSales)}</div><div class="kpi-lbl">総売上高</div></div>
+      <div class="kpi-card"><div class="kpi-num">${Math.round(avgRate*1000)/10}%</div><div class="kpi-lbl">📈 平均利益率</div></div>
+      <div class="kpi-card"><div class="kpi-num">${fmt(Math.max(...profits))}</div><div class="kpi-lbl">💎 最高利益</div></div>
+      <div class="kpi-card"><div class="kpi-num" style="${Math.min(...profits)<0?'color:#C62828':''}">${fmt(Math.min(...profits))}</div><div class="kpi-lbl">📉 最低利益</div></div>
+    </div>
+    <div style="font-size:14px;font-weight:700;color:#444;margin-bottom:10px">📋 直近の売上履歴</div>
+    ${list.slice(0,20).map(r => `
+      <div class="item-card" style="border-left-color:#2E7D32">
+        <div class="item-top">
+          <div><div class="item-model">${r.model} ${r.capacity}</div><div class="item-id">${r.date} | ${r.invId}</div></div>
+          <div style="text-align:right">
+            <div class="item-profit ${r.profit<0?'neg':''}">${fmt(r.profit)}</div>
+            <div style="font-size:11px;color:#888">${Math.round(r.profitRate*1000)/10}%</div>
+          </div>
         </div>
-      </div>
-    </div>`).join('');
-  document.getElementById('u-content').innerHTML = html;
+      </div>`).join('')}`;
+
+  } else if (tab === 'monthly') {
+    // 月別集計
+    const map = {};
+    list.forEach(r => {
+      const key = r.date ? r.date.slice(0,7) : '不明';
+      if (!map[key]) map[key] = {profit:0, count:0};
+      map[key].profit += r.profit;
+      map[key].count++;
+    });
+    const sorted = Object.entries(map).sort((a,b) => b[0].localeCompare(a[0]));
+    body = `<div class="card"><h2>📅 月別利益</h2>${
+      sorted.map(([month, d]) => `
+        <div class="period-row">
+          <div><div class="period-label">${month}</div><div class="period-sub">${d.count}件</div></div>
+          <div class="period-right">
+            <div class="period-profit">${fmt(d.profit)}</div>
+            <div class="period-count">平均 ${fmt(d.profit/d.count)}/件</div>
+          </div>
+        </div>`).join('')
+    }</div>`;
+
+  } else if (tab === 'weekly') {
+    // 週別集計
+    const map = {};
+    list.forEach(r => {
+      if (!r.date) return;
+      const d = new Date(r.date);
+      const day = d.getDay();
+      const monday = new Date(d);
+      monday.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
+      const key = monday.toISOString().slice(0,10);
+      if (!map[key]) map[key] = {profit:0, count:0, end: ''};
+      map[key].profit += r.profit;
+      map[key].count++;
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+      map[key].end = sunday.toISOString().slice(0,10);
+    });
+    const sorted = Object.entries(map).sort((a,b) => b[0].localeCompare(a[0]));
+    body = `<div class="card"><h2>📅 週別利益</h2>${
+      sorted.map(([start, d]) => `
+        <div class="period-row">
+          <div><div class="period-label">${start} 〜</div><div class="period-sub">${d.end} (${d.count}件)</div></div>
+          <div class="period-right">
+            <div class="period-profit">${fmt(d.profit)}</div>
+            <div class="period-count">平均 ${fmt(d.profit/d.count)}/件</div>
+          </div>
+        </div>`).join('')
+    }</div>`;
+
+  } else if (tab === 'model') {
+    // 機種別ランキング（件数順）
+    const map = {};
+    list.forEach(r => {
+      const key = r.model;
+      if (!map[key]) map[key] = {profit:0, count:0};
+      map[key].profit += r.profit;
+      map[key].count++;
+    });
+    const sorted = Object.entries(map).sort((a,b) => b[1].count - a[1].count);
+    const medals = ['gold','silver','bronze'];
+    body = `<div class="card"><h2>📱 機種別ランキング（件数順）</h2>${
+      sorted.map(([model, d], i) => `
+        <div class="rank-row">
+          <div class="rank-num ${medals[i]||''}">${i+1}</div>
+          <div class="rank-label"><div style="font-weight:600">${model}</div><div style="font-size:11px;color:#888">${d.count}件 / 平均 ${fmt(d.profit/d.count)}</div></div>
+          <div class="rank-val">${fmt(d.profit)}</div>
+        </div>`).join('')
+    }</div>`;
+
+  } else if (tab === 'profit') {
+    // 利益額ランキング（機種別総利益）
+    const map = {};
+    list.forEach(r => {
+      const key = r.model;
+      if (!map[key]) map[key] = {profit:0, count:0};
+      map[key].profit += r.profit;
+      map[key].count++;
+    });
+    const sorted = Object.entries(map).sort((a,b) => b[1].profit - a[1].profit);
+    const medals = ['gold','silver','bronze'];
+    body = `<div class="card"><h2>💰 利益額ランキング（機種別）</h2>${
+      sorted.map(([model, d], i) => `
+        <div class="rank-row">
+          <div class="rank-num ${medals[i]||''}">${i+1}</div>
+          <div class="rank-label"><div style="font-weight:600">${model}</div><div style="font-size:11px;color:#888">${d.count}件 / 平均 ${fmt(d.profit/d.count)}</div></div>
+          <div class="rank-val">${fmt(d.profit)}</div>
+        </div>`).join('')
+    }</div>`;
+  }
+
+  document.getElementById('u-content').innerHTML = tabBar + body;
+  // タブ切り替え用にlistをキャッシュ
+  window._uraigeList = list;
+}
+
+window.switchUriageTab = function(tab) {
+  urageTab = tab;
+  if (window._uraigeList) renderUriage(window._uraigeList, tab);
 };
 
 // ========== ユーティリティ ==========

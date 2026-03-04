@@ -462,7 +462,7 @@ function renderZaiko() {
     const dc = days >= 30 ? 'danger' : days >= 14 ? 'warn' : '';
     return `<div class="item-card s-${r.status}">
       <div class="item-top">
-        <div><div class="item-model">${r.model} ${r.capacity}</div><div class="item-id">${r.invId} | ${r.date}</div></div>
+        <div><div class="item-model">${r.model} ${r.capacity}</div><div class="item-id">${r.invId} | ${r.date}${r.imei ? ' | IMEI: ' + r.imei : ''}</div>
         <span class="badge badge-${r.status}">${r.status}</span>
       </div>
       <div class="item-prices">

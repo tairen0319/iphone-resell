@@ -7,14 +7,11 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;background:#f0f2f5;min-height:100vh;}
-/* ヘッダー */
 .header{background:linear-gradient(135deg,#1a1a2e,#16213e);color:white;padding:14px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.3);}
 .header h1{font-size:16px;font-weight:700;flex:1;}
 .back-btn{color:white;background:none;border:none;font-size:22px;cursor:pointer;padding:0 4px;}
 .reload-btn{background:rgba(255,255,255,0.2);border:none;color:white;padding:6px 12px;border-radius:8px;font-size:13px;cursor:pointer;}
-/* ページ切り替え */
 .page{display:none;}.page.active{display:block;}
-/* ダッシュボード */
 .nav-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:20px;max-width:480px;margin:0 auto;}
 .nav-card{background:white;border-radius:16px;padding:24px 16px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:transform 0.15s;border:none;width:100%;}
 .nav-card:active{transform:scale(0.97);}
@@ -25,11 +22,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 .card-zaiko{border-top:4px solid #FF8F00;}
 .card-uriage{border-top:4px solid #2E7D32;}
 .card-souba{border-top:4px solid #7B1FA2;}
-/* 共通コンテナ */
 .container{padding:16px;max-width:480px;margin:0 auto;}
 .card{background:white;border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,0.07);}
 .card h2{font-size:14px;color:#666;margin-bottom:12px;font-weight:600;}
-/* フォーム */
 label{display:block;font-size:13px;font-weight:600;color:#444;margin-bottom:4px;margin-top:12px;}
 label:first-of-type{margin-top:0;}
 select,input,textarea{width:100%;padding:12px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:15px;background:#fafafa;outline:none;-webkit-appearance:none;font-family:inherit;}
@@ -40,7 +35,7 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
 .btn-gray{background:#f0f0f0;color:#666;}
 .btn-red{background:#C62828;color:white;}
 .btn-orange{background:#FF8F00;color:white;}
-/* 結果表示 */
+.btn-purple{background:#7B1FA2;color:white;}
 .result-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:14px;}
 .result-row:last-child{border-bottom:none;}
 .result-row .val{font-weight:600;}
@@ -48,7 +43,6 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
 .judgment.green{background:#C8E6C9;color:#2E7D32;}
 .judgment.yellow{background:#FFF9C4;color:#F57F17;}
 .judgment.red{background:#FFCDD2;color:#C62828;}
-/* 在庫カード */
 .item-card{background:white;border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 2px 6px rgba(0,0,0,0.07);border-left:4px solid #e0e0e0;}
 .item-card.s-未出品{border-left-color:#9E9E9E;}
 .item-card.s-出品中{border-left-color:#4A90D9;}
@@ -66,11 +60,11 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
 .days-chip{font-size:11px;padding:2px 8px;border-radius:10px;background:#f0f0f0;color:#666;}
 .days-chip.warn{background:#FFF9C4;color:#F57F17;}
 .days-chip.danger{background:#FFCDD2;color:#C62828;}
-.action-row{display:flex;gap:8px;margin-top:10px;}
-.action-btn{flex:1;padding:8px;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;}
+.action-row{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+.action-btn{flex:1;padding:8px;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;min-width:80px;}
 .btn-status{background:#E3F2FD;color:#1565C0;}
 .btn-sell{background:#E8F5E9;color:#2E7D32;}
-/* KPI */
+.btn-template{background:#F3E5F5;color:#7B1FA2;}
 .kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
 .kpi-card{background:white;border-radius:14px;padding:14px;box-shadow:0 2px 6px rgba(0,0,0,0.07);text-align:center;}
 .kpi-card.full{grid-column:1/-1;}
@@ -78,27 +72,26 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
 .kpi-num{font-size:22px;font-weight:800;color:#2E7D32;}
 .kpi-card.highlight .kpi-num{font-size:26px;}
 .kpi-lbl{font-size:11px;color:#888;margin-top:3px;}
-/* サマリーバー */
 .summary-bar{background:white;border-radius:12px;padding:12px 16px;margin-bottom:12px;display:flex;justify-content:space-around;box-shadow:0 2px 6px rgba(0,0,0,0.07);}
 .sum-item{text-align:center;}
 .sum-num{font-size:20px;font-weight:700;color:#FF8F00;}
 .sum-lbl{font-size:11px;color:#888;margin-top:2px;}
-/* モーダル */
 .modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;}
 .modal-overlay.show{display:flex;}
-.modal{background:white;border-radius:16px;padding:24px;width:90%;max-width:360px;}
+.modal{background:white;border-radius:16px;padding:24px;width:90%;max-width:400px;max-height:90vh;overflow-y:auto;}
 .modal h3{font-size:16px;margin-bottom:16px;font-weight:700;}
 .modal-btns{display:flex;gap:8px;margin-top:12px;}
 .modal-btns button{flex:1;padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;}
 .modal-ok{background:#2E7D32;color:white;}
 .modal-cancel{background:#f0f0f0;color:#666;}
-/* トースト */
+/* テンプレモーダル専用 */
+.template-output{width:100%;height:320px;padding:12px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:12px;background:#fafafa;font-family:inherit;resize:none;line-height:1.6;}
+.copy-btn{width:100%;padding:14px;background:#7B1FA2;color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;}
+.copy-btn.copied{background:#2E7D32;}
 .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#333;color:white;padding:12px 24px;border-radius:24px;font-size:14px;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;}
 .toast.show{opacity:1;}
-/* ローディング */
 .loading{text-align:center;padding:40px;color:#888;font-size:15px;}
 .empty{text-align:center;padding:40px;color:#aaa;font-size:15px;}
-/* 相場管理 */
 .souba-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:13px;}
 .souba-row:last-child{border-bottom:none;}
 .souba-price{font-weight:700;color:#1565C0;}
@@ -107,56 +100,29 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
 </head>
 <body>
 
-<!-- ========== ダッシュボード ========== -->
+<!-- ダッシュボード -->
 <div id="page-dashboard" class="page active">
   <div class="header"><h1>📱 iPhone転売管理</h1></div>
   <div class="nav-grid">
-    <button class="nav-card card-shiire" onclick="showPage('shiire')">
-      <span class="icon">🔍</span>
-      <div class="label">仕入れ判断</div>
-      <div class="desc">利益を即計算</div>
-    </button>
-    <button class="nav-card card-zaiko" onclick="showPage('zaiko')">
-      <span class="icon">📦</span>
-      <div class="label">在庫一覧</div>
-      <div class="desc">ステータス管理</div>
-    </button>
-    <button class="nav-card card-uriage" onclick="showPage('uriage')">
-      <span class="icon">💰</span>
-      <div class="label">売上サマリー</div>
-      <div class="desc">利益・件数を確認</div>
-    </button>
-    <button class="nav-card card-souba" onclick="showPage('souba')">
-      <span class="icon">📊</span>
-      <div class="label">相場管理</div>
-      <div class="desc">月1更新</div>
-    </button>
+    <button class="nav-card card-shiire" onclick="showPage('shiire')"><span class="icon">🔍</span><div class="label">仕入れ判断</div><div class="desc">利益を即計算</div></button>
+    <button class="nav-card card-zaiko" onclick="showPage('zaiko')"><span class="icon">📦</span><div class="label">在庫一覧</div><div class="desc">ステータス管理</div></button>
+    <button class="nav-card card-uriage" onclick="showPage('uriage')"><span class="icon">💰</span><div class="label">売上サマリー</div><div class="desc">利益・件数を確認</div></button>
+    <button class="nav-card card-souba" onclick="showPage('souba')"><span class="icon">📊</span><div class="label">相場管理</div><div class="desc">月1更新</div></button>
   </div>
   <div class="footer">Firebase同期 | iPhone転売管理</div>
 </div>
 
-<!-- ========== 仕入れ判断 ========== -->
+<!-- 仕入れ判断 -->
 <div id="page-shiire" class="page">
-  <div class="header">
-    <button class="back-btn" onclick="showPage('dashboard')">←</button>
-    <h1>🔍 仕入れ判断</h1>
-  </div>
+  <div class="header"><button class="back-btn" onclick="showPage('dashboard')">←</button><h1>🔍 仕入れ判断</h1></div>
   <div class="container">
     <div class="card">
       <h2>商品情報を入力</h2>
-      <label>機種</label>
-      <select id="s-model"><option value="">読み込み中...</option></select>
+      <label>機種</label><select id="s-model"><option value="">読み込み中...</option></select>
       <label>容量</label>
-      <select id="s-capacity">
-        <option value="">選択</option>
-        <option>64GB</option><option>128GB</option>
-        <option>256GB</option><option>512GB</option><option>1TB</option>
-      </select>
+      <select id="s-capacity"><option value="">選択</option><option>64GB</option><option>128GB</option><option>256GB</option><option>512GB</option><option>1TB</option></select>
       <label>画面交換</label>
-      <select id="s-screen">
-        <option value="">選択</option>
-        <option>あり</option><option>なし</option>
-      </select>
+      <select id="s-screen"><option value="">選択</option><option>あり</option><option>なし</option></select>
       <label>仕入れ値（円）</label>
       <input type="number" id="s-price" placeholder="例: 12000" inputmode="numeric">
       <label>メモ（任意）</label>
@@ -181,15 +147,11 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
   </div>
 </div>
 
-<!-- ========== 在庫一覧 ========== -->
+<!-- 在庫一覧 -->
 <div id="page-zaiko" class="page">
-  <div class="header">
-    <button class="back-btn" onclick="showPage('dashboard')">←</button>
-    <h1>📦 在庫一覧</h1>
-    <button class="reload-btn" onclick="loadZaiko()">↻</button>
-  </div>
+  <div class="header"><button class="back-btn" onclick="showPage('dashboard')">←</button><h1>📦 在庫一覧</h1><button class="reload-btn" onclick="loadZaiko()">↻</button></div>
   <div class="container">
-    <div class="summary-bar" id="z-summary">
+    <div class="summary-bar">
       <div class="sum-item"><div class="sum-num" id="z-count">-</div><div class="sum-lbl">在庫数</div></div>
       <div class="sum-item"><div class="sum-num" id="z-profit">-</div><div class="sum-lbl">予想利益計</div></div>
       <div class="sum-item"><div class="sum-num" id="z-days">-</div><div class="sum-lbl">平均滞留</div></div>
@@ -198,39 +160,25 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
   </div>
 </div>
 
-<!-- ========== 売上サマリー ========== -->
+<!-- 売上サマリー -->
 <div id="page-uriage" class="page">
-  <div class="header">
-    <button class="back-btn" onclick="showPage('dashboard')">←</button>
-    <h1>💰 売上サマリー</h1>
-    <button class="reload-btn" onclick="loadUriage()">↻</button>
-  </div>
-  <div class="container">
-    <div id="u-content"><div class="loading">⏳ 読み込み中...</div></div>
-  </div>
+  <div class="header"><button class="back-btn" onclick="showPage('dashboard')">←</button><h1>💰 売上サマリー</h1><button class="reload-btn" onclick="loadUriage()">↻</button></div>
+  <div class="container"><div id="u-content"><div class="loading">⏳ 読み込み中...</div></div></div>
 </div>
 
-<!-- ========== 相場管理 ========== -->
+<!-- 相場管理 -->
 <div id="page-souba" class="page">
-  <div class="header">
-    <button class="back-btn" onclick="showPage('dashboard')">←</button>
-    <h1>📊 相場管理</h1>
-  </div>
+  <div class="header"><button class="back-btn" onclick="showPage('dashboard')">←</button><h1>📊 相場管理</h1></div>
   <div class="container">
     <div class="card">
       <h2>💡 相場を個別に更新</h2>
-      <label>機種</label>
-      <select id="so-model"><option value="">選択</option></select>
-      <label>容量</label>
-      <select id="so-cap"><option value="">選択</option></select>
+      <label>機種</label><select id="so-model"><option value="">選択</option></select>
+      <label>容量</label><select id="so-cap"><option value="">選択</option></select>
       <label>新しい相場（円）</label>
       <input type="number" id="so-price" placeholder="例: 85000" inputmode="numeric">
       <button class="btn btn-orange" onclick="updateSouba()">📊 相場を更新</button>
     </div>
-    <div class="card">
-      <h2>📋 現在の相場一覧</h2>
-      <div id="so-list"><div class="loading">⏳ 読み込み中...</div></div>
-    </div>
+    <div class="card"><h2>📋 現在の相場一覧</h2><div id="so-list"><div class="loading">⏳ 読み込み中...</div></div></div>
   </div>
 </div>
 
@@ -239,9 +187,7 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
   <div class="modal">
     <h3 id="modal-title">ステータス変更</h3>
     <label>ステータス</label>
-    <select id="modal-status">
-      <option>未出品</option><option>出品中</option><option>取引中</option>
-    </select>
+    <select id="modal-status"><option>未出品</option><option>出品中</option><option>取引中</option></select>
     <div id="modal-sell-area" style="display:none;margin-top:12px">
       <label>売却価格（円）</label>
       <input type="number" id="modal-sell-price" placeholder="例: 18000" inputmode="numeric">
@@ -253,13 +199,28 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
   </div>
 </div>
 
-<!-- トースト -->
+<!-- 出品テンプレモーダル ★新規追加 -->
+<div class="modal-overlay" id="templateModal">
+  <div class="modal">
+    <h3>📝 出品テンプレ生成</h3>
+    <label>画面の状態</label>
+    <input type="text" id="tmpl-screen" placeholder="例：傷や汚れなし">
+    <label>本体の傷</label>
+    <input type="text" id="tmpl-body" placeholder="例：右下角に若干の擦り傷あり">
+    <button class="btn btn-purple" onclick="generateTemplate()" style="margin-top:10px">📝 テンプレを生成</button>
+    <div id="tmpl-result" style="display:none;margin-top:12px">
+      <textarea class="template-output" id="tmpl-text" readonly></textarea>
+      <button class="copy-btn" id="tmpl-copy-btn" onclick="copyTemplate()">📋 コピーする</button>
+    </div>
+    <button class="modal-cancel" onclick="closeTemplateModal()" style="width:100%;padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px">閉じる</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
 import { getFirestore, collection, getDocs, addDoc, doc, updateDoc, deleteDoc, setDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
-
 const firebaseConfig = {
   apiKey: "AIzaSyBapimiG-dxZjyftV5kN9nIVFWVUFcjTHk",
   authDomain: "iphone-resell-dc263.firebaseapp.com",
@@ -268,35 +229,27 @@ const firebaseConfig = {
   messagingSenderId: "993125357871",
   appId: "1:993125357871:web:782bc724a9ba7f291469da"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-
-// グローバルに公開
 window._db = db;
 window._firebase = { collection, getDocs, addDoc, doc, updateDoc, deleteDoc, setDoc, query, orderBy };
 
-// ========== 初期化 ==========
 window.addEventListener('load', async () => {
   await initSouba();
   loadSoubaSelects();
 });
 
-// 相場データをFirebaseに初期登録（初回のみ）
 async function initSouba() {
   const snap = await getDocs(collection(db, 'souba'));
   if (snap.size > 0) { loadSoubaList(); return; }
-  // souba.jsonから読み込み
   const res = await fetch('souba.json');
   const data = await res.json();
   for (const item of data) {
-    const id = item.model + '_' + item.capacity;
-    await setDoc(doc(db, 'souba', id), item);
+    await setDoc(doc(db, 'souba', item.model + '_' + item.capacity), item);
   }
   loadSoubaList();
 }
 
-// ========== ページ遷移 ==========
 window.showPage = function(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
@@ -306,16 +259,12 @@ window.showPage = function(name) {
   if (name === 'souba')  loadSoubaList();
 };
 
-// ========== 相場 ==========
 let soubaData = [];
-
 async function loadSoubaList() {
   const snap = await getDocs(collection(db, 'souba'));
   soubaData = [];
   snap.forEach(d => soubaData.push({id: d.id, ...d.data()}));
   soubaData.sort((a,b) => b.souba - a.souba);
-
-  // 一覧表示
   const el = document.getElementById('so-list');
   if (!el) return;
   el.innerHTML = soubaData.map(s => `
@@ -323,18 +272,13 @@ async function loadSoubaList() {
       <div><div style="font-weight:600">${s.model}</div><div style="color:#888;font-size:11px">${s.capacity}</div></div>
       <div class="souba-price">¥${s.souba.toLocaleString()}</div>
     </div>`).join('');
-
   loadSoubaSelects();
 }
 
 function loadSoubaSelects() {
-  // 仕入れ判断の機種セレクト
   const models = [...new Set(soubaData.map(s => s.model))];
   const sel = document.getElementById('s-model');
-  if (sel) {
-    sel.innerHTML = '<option value="">選択</option>' + models.map(m => `<option>${m}</option>`).join('');
-  }
-  // 相場管理の機種セレクト
+  if (sel) sel.innerHTML = '<option value="">選択</option>' + models.map(m => `<option>${m}</option>`).join('');
   const soSel = document.getElementById('so-model');
   if (soSel) {
     soSel.innerHTML = '<option value="">選択</option>' + models.map(m => `<option>${m}</option>`).join('');
@@ -350,53 +294,43 @@ window.updateSouba = async function() {
   const cap   = document.getElementById('so-cap').value;
   const price = Number(document.getElementById('so-price').value);
   if (!model || !cap || !price) { showToast('⚠️ 全項目入力してください'); return; }
-  const id = model + '_' + cap;
-  await setDoc(doc(db, 'souba', id), {model, capacity: cap, souba: price, battery: 3500, shipping: 520}, {merge: true});
+  await setDoc(doc(db, 'souba', model + '_' + cap), {model, capacity: cap, souba: price, battery: 3500, shipping: 520}, {merge: true});
   showToast('✅ 相場を更新しました');
   document.getElementById('so-price').value = '';
   loadSoubaList();
 };
 
-// ========== 仕入れ判断 ==========
 let lastCalc = null;
-
 window.calcProfit = function() {
   const model  = document.getElementById('s-model').value;
   const cap    = document.getElementById('s-capacity').value;
   const screen = document.getElementById('s-screen').value;
   const price  = Number(document.getElementById('s-price').value);
   if (!model || !cap || !screen || !price) { showToast('⚠️ 全項目入力してください'); return; }
-
   const found = soubaData.find(s => s.model === model && s.capacity === cap);
   if (!found) { showToast('❌ 相場データがありません'); return; }
-
-  const souba      = found.souba;
-const battery    = found.battery || 0;
-const shipping   = found.shipping || 520;
-const screenCost = screen === 'あり' ? (found.frontPanel || 0) : 0;
-const partsSending = found.partsSending || 0;
-const accessories  = found.accessories || 0;
-const fee        = Math.ceil(souba * 0.1);
-const totalCost  = price + battery + screenCost + partsSending + accessories + fee + shipping;
-const profit     = souba - totalCost;
-const rate       = souba > 0 ? Math.round(profit / souba * 1000) / 10 : 0;
-
-
+  const souba        = found.souba;
+  const battery      = found.battery || 0;
+  const shipping     = found.shipping || 520;
+  const screenCost   = screen === 'あり' ? (found.frontPanel || 0) : 0;
+  const partsSending = found.partsSending || 0;
+  const accessories  = found.accessories || 0;
+  const fee          = Math.ceil(souba * 0.1);
+  const totalCost    = price + battery + screenCost + partsSending + accessories + fee + shipping;
+  const profit       = souba - totalCost;
+  const rate         = souba > 0 ? Math.round(profit / souba * 1000) / 10 : 0;
   lastCalc = {model, cap, screen, price, souba, battery, shipping, screenCost, fee, totalCost, profit, rate};
-
   document.getElementById('r-souba').textContent = fmt(souba);
   document.getElementById('r-fee').textContent   = fmt(fee);
   document.getElementById('r-ship').textContent  = fmt(shipping);
   document.getElementById('r-bat').textContent   = fmt(battery + screenCost + partsSending + accessories);
   document.getElementById('r-pur').textContent   = fmt(price);
   document.getElementById('r-cost').textContent  = fmt(totalCost);
-
   const j = document.getElementById('r-judgment');
   j.className = 'judgment ' + (profit >= 3000 ? 'green' : profit >= 1000 ? 'yellow' : 'red');
   j.textContent = profit >= 3000 ? `🟢 仕入れ推奨！利益 ${fmt(profit)}（${rate}%）`
                 : profit >= 1000 ? `🟡 微妙... 利益 ${fmt(profit)}（${rate}%）`
                 : `🔴 見送り推奨！利益 ${fmt(profit)}（${rate}%）`;
-
   document.getElementById('s-loading').style.display = 'none';
   document.getElementById('s-result').style.display = 'block';
 };
@@ -405,20 +339,15 @@ window.confirmPurchase = async function() {
   if (!lastCalc) return;
   const memo = document.getElementById('s-memo').value;
   if (!confirm(`${lastCalc.model} ${lastCalc.cap}\n¥${lastCalc.price.toLocaleString()} で仕入れ確定しますか？`)) return;
-
-  const now  = new Date();
-  const id   = genId(lastCalc.model, now);
+  const now = new Date();
+  const id  = genId(lastCalc.model, now);
   await addDoc(collection(db, 'zaiko'), {
-    invId: id,
-    date: now.toISOString().slice(0,10),
-    model: lastCalc.model,
-    capacity: lastCalc.cap,
+    invId: id, date: now.toISOString().slice(0,10),
+    model: lastCalc.model, capacity: lastCalc.cap,
     purchasePrice: lastCalc.price,
     partsCost: lastCalc.battery + lastCalc.screenCost,
-    souba: lastCalc.souba,
-    profit: lastCalc.profit,
-    status: '未出品',
-    memo: memo || '',
+    souba: lastCalc.souba, profit: lastCalc.profit,
+    status: '未出品', memo: memo || '', imei: '',
     createdAt: now.getTime()
   });
   showToast('✅ 在庫に追加！ ID: ' + id);
@@ -435,6 +364,7 @@ window.resetShiire = function() {
 // ========== 在庫一覧 ==========
 let zaikoList = [];
 let currentDocId = null;
+let templateItem = null;
 
 window.loadZaiko = async function() {
   document.getElementById('z-list').innerHTML = '<div class="loading">⏳ 読み込み中...</div>';
@@ -462,7 +392,10 @@ function renderZaiko() {
     const dc = days >= 30 ? 'danger' : days >= 14 ? 'warn' : '';
     return `<div class="item-card s-${r.status}">
       <div class="item-top">
-        <div><div class="item-model">${r.model} ${r.capacity}</div><div class="item-id">${r.invId} | ${r.date}${r.imei ? ' | IMEI: ' + r.imei : ''}</div>
+        <div>
+          <div class="item-model">${r.model} ${r.capacity}</div>
+          <div class="item-id">${r.invId} | ${r.date}${r.imei ? ' | IMEI: ' + r.imei : ''}</div>
+        </div>
         <span class="badge badge-${r.status}">${r.status}</span>
       </div>
       <div class="item-prices">
@@ -473,8 +406,9 @@ function renderZaiko() {
       <div class="item-profit ${profit<0?'neg':''}">予想利益: ${fmt(profit)}</div>
       ${r.memo ? `<div style="font-size:12px;color:#888;margin-top:4px">📝 ${r.memo}</div>` : ''}
       <div class="action-row">
-        <button class="action-btn btn-status" onclick="openModal('${r.docId}','${r.status}',false)">📋 ステータス変更</button>
-        <button class="action-btn btn-sell"   onclick="openModal('${r.docId}','${r.status}',true)">💰 売却処理</button>
+        <button class="action-btn btn-status"   onclick="openModal('${r.docId}','${r.status}',false)">📋 ステータス</button>
+        <button class="action-btn btn-sell"     onclick="openModal('${r.docId}','${r.status}',true)">💰 売却</button>
+        <button class="action-btn btn-template" onclick="openTemplateModal('${r.docId}')">📝 テンプレ</button>
       </div>
     </div>`;
   }).join('');
@@ -484,6 +418,79 @@ function renderZaiko() {
   document.getElementById('z-days').textContent   = Math.round(totalDays / zaikoList.length) + '日';
 }
 
+// ========== 出品テンプレ ★新規 ==========
+window.openTemplateModal = function(docId) {
+  templateItem = zaikoList.find(r => r.docId === docId);
+  if (!templateItem) return;
+  document.getElementById('tmpl-screen').value = '';
+  document.getElementById('tmpl-body').value = '';
+  document.getElementById('tmpl-result').style.display = 'none';
+  document.getElementById('tmpl-copy-btn').textContent = '📋 コピーする';
+  document.getElementById('tmpl-copy-btn').classList.remove('copied');
+  document.getElementById('templateModal').classList.add('show');
+};
+
+window.closeTemplateModal = function() {
+  document.getElementById('templateModal').classList.remove('show');
+};
+
+window.generateTemplate = function() {
+  if (!templateItem) return;
+  const screenState = document.getElementById('tmpl-screen').value || '【画面の状態を入力（例：傷や汚れなし）】';
+  const bodyState   = document.getElementById('tmpl-body').value   || '【本体の傷を入力（例：右下角に若干の擦り傷あり）】';
+  const imei = templateItem.imei || '【IMEIを入力】';
+
+  const text = `■ フォロー割実施中！
+『購入前』にフォローして、『フォロー割希望』とコメントして下さい！
+300円のお値引きをさせていただきます。
+■ 他にもiPhone端末本体出品中！
+#即購入OKですのiphone
+■ 機種概要
+機種名：${templateItem.model}
+容量：${templateItem.capacity}
+SIMフリー（ロック解除済）
+ネットワーク利用制限：〇 
+アクティベーションロック：解除済
+初期化：全て初期化済
+IMEI：${imei}
+■ 商品状態
+画面：${screenState}
+本体の傷：${bodyState}
+Face ID：使用可能
+バッテリー：新品に交換 最大容量100%
+動作確認：起動・充電・カメラ・各種ボタン類・電波
+　　　　　液晶及びタッチパネル等すべての動作を確認済みです
+■ 梱包/発送
+緩衝材に包み、丁寧に梱包して発送します。
+ご購入頂いた後24時間以内に発送いたします。
+■ ご購入前の注意点
+・中古品のため微細な傷や使用感があります
+・新品同様をお求めの方や神経質な方はご遠慮ください
+・他フリマサイトでも同時に出品しているため、タイミングによっては売り切れの場合がございます。
+■ 初期保証について
+・商品到着から7日以内に不具合があった場合は、受取評価前にご連絡ください
+・保証対象は「動作確認項目」に関する明確な不具合のみです
+・保証対応は、修理・交換・返品いずれかを相談のうえ対応いたします
+・外観や使用感、色味などの感覚的な違いによる返品は対象外です。`;
+
+  document.getElementById('tmpl-text').value = text;
+  document.getElementById('tmpl-result').style.display = 'block';
+};
+
+window.copyTemplate = function() {
+  const text = document.getElementById('tmpl-text').value;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('tmpl-copy-btn');
+    btn.textContent = '✅ コピーしました！';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = '📋 コピーする';
+      btn.classList.remove('copied');
+    }, 2500);
+  });
+};
+
+// ========== ステータス・売却モーダル ==========
 let isSellMode = false;
 window.openModal = function(docId, status, sellMode) {
   currentDocId = docId;
@@ -495,6 +502,7 @@ window.openModal = function(docId, status, sellMode) {
   document.getElementById('modal-sell-price').value = '';
   document.getElementById('statusModal').classList.add('show');
 };
+
 window.closeModal = function() {
   document.getElementById('statusModal').classList.remove('show');
 };
@@ -503,14 +511,13 @@ window.applyStatus = async function() {
   const item = zaikoList.find(r => r.docId === currentDocId);
   if (!item) return;
   closeModal();
-
   if (isSellMode) {
     const sellPrice = Number(document.getElementById('modal-sell-price').value);
     if (!sellPrice || sellPrice <= 0) { showToast('⚠️ 売却価格を入力してください'); return; }
-    const fee      = Math.ceil(sellPrice * 0.1);
+    const fee     = Math.ceil(sellPrice * 0.1);
     const shipping = 520;
-    const profit   = sellPrice - fee - shipping - item.purchasePrice - (item.partsCost || 0);
-    const now      = new Date();
+    const profit  = sellPrice - fee - shipping - item.purchasePrice - (item.partsCost || 0);
+    const now     = new Date();
     await addDoc(collection(db, 'uriage'), {
       date: now.toISOString().slice(0,10),
       invId: item.invId, model: item.model, capacity: item.capacity,
@@ -544,17 +551,15 @@ window.loadUriage = async function() {
   const totalProfit = list.reduce((s,r) => s + r.profit, 0);
   const avgRate     = list.reduce((s,r) => s + r.profitRate, 0) / list.length;
   const profits     = list.map(r => r.profit);
-
   let html = `<div class="kpi-grid">
     <div class="kpi-card full highlight"><div class="kpi-num">${fmt(totalProfit)}</div><div class="kpi-lbl">🎯 純利益合計</div></div>
     <div class="kpi-card"><div class="kpi-num" style="color:#1565C0">${list.length}件</div><div class="kpi-lbl">総売上件数</div></div>
     <div class="kpi-card"><div class="kpi-num" style="color:#1565C0">${fmt(totalSales)}</div><div class="kpi-lbl">総売上高</div></div>
     <div class="kpi-card"><div class="kpi-num">${Math.round(avgRate*1000)/10}%</div><div class="kpi-lbl">📈 平均利益率</div></div>
     <div class="kpi-card"><div class="kpi-num">${fmt(Math.max(...profits))}</div><div class="kpi-lbl">💎 最高利益</div></div>
-    <div class="kpi-card"><div class="kpi-num ${Math.min(...profits)<0?'':''}' style="${Math.min(...profits)<0?'color:#C62828':''}">${fmt(Math.min(...profits))}</div><div class="kpi-lbl">📉 最低利益</div></div>
+    <div class="kpi-card"><div class="kpi-num" style="${Math.min(...profits)<0?'color:#C62828':''}">${fmt(Math.min(...profits))}</div><div class="kpi-lbl">📉 最低利益</div></div>
   </div>
   <div style="font-size:14px;font-weight:700;color:#444;margin-bottom:10px">📋 直近の売上履歴</div>`;
-
   html += list.slice(0,20).map(r => `
     <div class="item-card" style="border-left-color:#2E7D32">
       <div class="item-top">
@@ -565,21 +570,18 @@ window.loadUriage = async function() {
         </div>
       </div>
     </div>`).join('');
-
   document.getElementById('u-content').innerHTML = html;
 };
 
 // ========== ユーティリティ ==========
 function fmt(n) { return '¥' + Math.round(n).toLocaleString(); }
-
 function genId(model, now) {
-  const num = (model.match(/(\d+)/) || ['','00'])[1];
-  const l   = model.toLowerCase();
+  const num  = (model.match(/(\d+)/) || ['','00'])[1];
+  const l    = model.toLowerCase();
   const code = l.includes('pro max') ? num+'pm' : l.includes('pro') ? num+'pro' : l.includes('plus') ? num+'+' : l.includes('mini') ? num+'m' : num;
   const date = (now.getMonth()+1).toString().padStart(2,'0') + now.getDate().toString().padStart(2,'0');
   return code + '-' + date + Math.floor(Math.random()*90+10);
 }
-
 window.showToast = function(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');

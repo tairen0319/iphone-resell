@@ -22,6 +22,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 .card-zaiko{border-top:4px solid #FF8F00;}
 .card-uriage{border-top:4px solid #2E7D32;}
 .card-souba{border-top:4px solid #7B1FA2;}
+.card-seisan{border-top:4px solid #E91E63;}
+.nav-grid-wide{grid-template-columns:1fr;}
 .container{padding:16px;max-width:480px;margin:0 auto;}
 .card{background:white;border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,0.07);}
 .card h2{font-size:14px;color:#666;margin-bottom:12px;font-weight:600;}
@@ -36,6 +38,7 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
 .btn-red{background:#C62828;color:white;}
 .btn-orange{background:#FF8F00;color:white;}
 .btn-purple{background:#7B1FA2;color:white;}
+.btn-pink{background:#E91E63;color:white;}
 .result-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:14px;}
 .result-row:last-child{border-bottom:none;}
 .result-row .val{font-weight:600;}
@@ -69,18 +72,18 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
 .kpi-card{background:white;border-radius:14px;padding:14px;box-shadow:0 2px 6px rgba(0,0,0,0.07);text-align:center;}
 .kpi-card.full{grid-column:1/-1;}
 .kpi-card.highlight{border:2px solid #2E7D32;}
+.kpi-card.highlight-pink{border:2px solid #E91E63;}
 .kpi-num{font-size:22px;font-weight:800;color:#2E7D32;}
 .kpi-card.highlight .kpi-num{font-size:26px;}
+.kpi-card.highlight-pink .kpi-num{font-size:26px;color:#E91E63;}
 .kpi-lbl{font-size:11px;color:#888;margin-top:3px;}
 .summary-bar{background:white;border-radius:12px;padding:12px 16px;margin-bottom:12px;display:flex;justify-content:space-around;box-shadow:0 2px 6px rgba(0,0,0,0.07);}
 .sum-item{text-align:center;}
 .sum-num{font-size:20px;font-weight:700;color:#FF8F00;}
 .sum-lbl{font-size:11px;color:#888;margin-top:2px;}
-/* タブ */
 .tab-bar{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px;}
 .tab-btn{flex-shrink:0;padding:8px 14px;border:none;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;background:#f0f0f0;color:#666;}
 .tab-btn.active{background:#2E7D32;color:white;}
-/* ランキング行 */
 .rank-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:13px;}
 .rank-row:last-child{border-bottom:none;}
 .rank-num{font-size:16px;font-weight:800;color:#aaa;width:24px;flex-shrink:0;}
@@ -89,7 +92,6 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
 .rank-num.bronze{color:#A1887F;}
 .rank-label{flex:1;margin:0 10px;}
 .rank-val{font-weight:700;color:#2E7D32;font-size:13px;}
-/* 月別・週別行 */
 .period-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:13px;}
 .period-row:last-child{border-bottom:none;}
 .period-label{font-weight:600;color:#333;}
@@ -97,6 +99,19 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
 .period-right{text-align:right;}
 .period-profit{font-weight:700;color:#2E7D32;font-size:14px;}
 .period-count{font-size:11px;color:#888;}
+/* 精算画面 */
+.seisan-result{border-radius:16px;padding:20px;text-align:center;margin:14px 0;}
+.seisan-result.pay{background:linear-gradient(135deg,#FCE4EC,#F8BBD0);border:2px solid #E91E63;}
+.seisan-result.even{background:linear-gradient(135deg,#E8F5E9,#C8E6C9);border:2px solid #2E7D32;}
+.seisan-who{font-size:14px;color:#555;margin-bottom:6px;}
+.seisan-amount{font-size:32px;font-weight:800;color:#E91E63;}
+.seisan-result.even .seisan-amount{color:#2E7D32;}
+.seisan-label{font-size:13px;color:#888;margin-top:4px;}
+.seisan-detail-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:13px;}
+.seisan-detail-row:last-child{border-bottom:none;}
+.seisan-detail-row .s-val{font-weight:700;}
+.seisan-detail-row .s-val.tairen{color:#4A90D9;}
+.seisan-detail-row .s-val.ryo{color:#FF8F00;}
 .modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;}
 .modal-overlay.show{display:flex;}
 .modal{background:white;border-radius:16px;padding:24px;width:90%;max-width:400px;max-height:90vh;overflow-y:auto;}
@@ -125,9 +140,16 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
   <div class="header"><h1>📱 iPhone転売管理</h1></div>
   <div class="nav-grid">
     <button class="nav-card card-shiire" onclick="showPage('shiire')"><span class="icon">🔍</span><div class="label">仕入れ判断</div><div class="desc">利益を即計算</div></button>
-    <button class="nav-card card-zaiko" onclick="showPage('zaiko')"><span class="icon">📦</span><div class="label">在庫一覧</div><div class="desc">ステータス管理</div></button>
+    <button class="nav-card card-zaiko"  onclick="showPage('zaiko')"><span class="icon">📦</span><div class="label">在庫一覧</div><div class="desc">ステータス管理</div></button>
     <button class="nav-card card-uriage" onclick="showPage('uriage')"><span class="icon">💰</span><div class="label">売上サマリー</div><div class="desc">利益・件数を確認</div></button>
-    <button class="nav-card card-souba" onclick="showPage('souba')"><span class="icon">📊</span><div class="label">相場管理</div><div class="desc">月1更新</div></button>
+    <button class="nav-card card-souba"  onclick="showPage('souba')"><span class="icon">📊</span><div class="label">相場管理</div><div class="desc">月1更新</div></button>
+  </div>
+  <!-- 精算ボタン（横幅いっぱい） -->
+  <div style="padding:0 20px 20px;max-width:480px;margin:0 auto;">
+    <button class="nav-card card-seisan" style="width:100%;display:flex;align-items:center;gap:16px;padding:18px 20px;text-align:left;" onclick="showPage('seisan')">
+      <span style="font-size:36px;">🤝</span>
+      <div><div class="label">精算管理</div><div class="desc">たいれん ↔ りょう の分配計算</div></div>
+    </button>
   </div>
   <div class="footer">Firebase同期 | iPhone転売管理</div>
 </div>
@@ -202,6 +224,22 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
   </div>
 </div>
 
+<!-- 精算管理 -->
+<div id="page-seisan" class="page">
+  <div class="header"><button class="back-btn" onclick="showPage('dashboard')">←</button><h1>🤝 精算管理</h1><button class="reload-btn" onclick="loadSeisan()">↻</button></div>
+  <div class="container">
+    <div class="card">
+      <h2>📅 期間を選択</h2>
+      <select id="seisan-period" onchange="loadSeisan()">
+        <option value="thismonth">今月</option>
+        <option value="lastmonth">先月</option>
+        <option value="all">全期間</option>
+      </select>
+    </div>
+    <div id="seisan-content"><div class="loading">⏳ 読み込み中...</div></div>
+  </div>
+</div>
+
 <!-- ステータス変更モーダル -->
 <div class="modal-overlay" id="statusModal">
   <div class="modal">
@@ -211,6 +249,11 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
     <div id="modal-sell-area" style="display:none;margin-top:12px">
       <label>売却価格（円）</label>
       <input type="number" id="modal-sell-price" placeholder="例: 18000" inputmode="numeric">
+      <label>出品アカウント</label>
+      <select id="modal-account">
+        <option value="たいれん">たいれん</option>
+        <option value="りょう">りょう</option>
+      </select>
     </div>
     <div class="modal-btns">
       <button class="modal-cancel" onclick="closeModal()">キャンセル</button>
@@ -279,6 +322,7 @@ window.showPage = function(name) {
   if (name === 'zaiko')  loadZaiko();
   if (name === 'uriage') loadUriage();
   if (name === 'souba')  loadSoubaList();
+  if (name === 'seisan') loadSeisan();
 };
 
 let soubaData = [];
@@ -370,6 +414,8 @@ window.confirmPurchase = async function() {
     partsCost: lastCalc.battery + lastCalc.screenCost,
     souba: lastCalc.souba, profit: lastCalc.profit,
     status: '未出品', memo: memo || '', imei: '',
+    tairenPaid: lastCalc.price,  // 仕入れはたいれんが払う
+    ryoPaid: lastCalc.battery + lastCalc.screenCost, // パーツはりょうが払う
     createdAt: now.getTime()
   });
   showToast('✅ 在庫に追加！ ID: ' + id);
@@ -444,7 +490,6 @@ function renderZaiko() {
 window.openTemplateModal = function(docId) {
   templateItem = zaikoList.find(r => r.docId === docId);
   if (!templateItem) return;
-  // IMEIが登録済みなら自動入力
   document.getElementById('tmpl-imei').value   = templateItem.imei || '';
   document.getElementById('tmpl-screen').value = '';
   document.getElementById('tmpl-body').value   = '';
@@ -463,7 +508,6 @@ window.generateTemplate = function() {
   const imei        = document.getElementById('tmpl-imei').value   || '【IMEIを入力】';
   const screenState = document.getElementById('tmpl-screen').value || '【画面の状態を入力（例：傷や汚れなし）】';
   const bodyState   = document.getElementById('tmpl-body').value   || '【本体の傷を入力（例：右下角に若干の擦り傷あり）】';
-
   const text =
 `■ フォロー割実施中！
 『購入前』にフォローして、『フォロー割希望』とコメントして下さい！
@@ -497,7 +541,6 @@ Face ID：使用可能
 ・保証対象は「動作確認項目」に関する明確な不具合のみです
 ・保証対応は、修理・交換・返品いずれかを相談のうえ対応いたします
 ・外観や使用感、色味などの感覚的な違いによる返品は対象外です。`;
-
   document.getElementById('tmpl-text').value = text;
   document.getElementById('tmpl-result').style.display = 'block';
 };
@@ -522,6 +565,7 @@ window.openModal = function(docId, status, sellMode) {
   document.getElementById('modal-status').style.display = sellMode ? 'none' : 'block';
   document.getElementById('modal-sell-area').style.display = sellMode ? 'block' : 'none';
   document.getElementById('modal-sell-price').value = '';
+  document.getElementById('modal-account').value = 'たいれん';
   document.getElementById('statusModal').classList.add('show');
 };
 
@@ -535,6 +579,7 @@ window.applyStatus = async function() {
   closeModal();
   if (isSellMode) {
     const sellPrice = Number(document.getElementById('modal-sell-price').value);
+    const account   = document.getElementById('modal-account').value;
     if (!sellPrice || sellPrice <= 0) { showToast('⚠️ 売却価格を入力してください'); return; }
     const fee      = Math.ceil(sellPrice * 0.1);
     const shipping = 520;
@@ -544,6 +589,9 @@ window.applyStatus = async function() {
       date: now.toISOString().slice(0,10),
       invId: item.invId, model: item.model, capacity: item.capacity,
       purchasePrice: item.purchasePrice, partsCost: item.partsCost || 0,
+      tairenPaid: item.tairenPaid || item.purchasePrice || 0,
+      ryoPaid: item.ryoPaid || item.partsCost || 0,
+      account,
       sellPrice, fee, shipping,
       totalCost: item.purchasePrice + (item.partsCost||0) + fee + shipping,
       profit, profitRate: sellPrice > 0 ? profit/sellPrice : 0,
@@ -559,9 +607,111 @@ window.applyStatus = async function() {
   loadZaiko();
 };
 
+// ========== 精算管理 ==========
+window.loadSeisan = async function() {
+  const period = document.getElementById('seisan-period')?.value || 'thismonth';
+  document.getElementById('seisan-content').innerHTML = '<div class="loading">⏳ 計算中...</div>';
+
+  const snap = await getDocs(query(collection(db, 'uriage'), orderBy('createdAt', 'desc')));
+  let list = [];
+  snap.forEach(d => list.push(d.data()));
+
+  // 期間フィルタ
+  const now = new Date();
+  const thisMonth = now.toISOString().slice(0,7);
+  const lastMonthDate = new Date(now.getFullYear(), now.getMonth()-1, 1);
+  const lastMonth = lastMonthDate.toISOString().slice(0,7);
+
+  if (period === 'thismonth') {
+    list = list.filter(r => r.date && r.date.startsWith(thisMonth));
+  } else if (period === 'lastmonth') {
+    list = list.filter(r => r.date && r.date.startsWith(lastMonth));
+  }
+
+  if (!list.length) {
+    document.getElementById('seisan-content').innerHTML = '<div class="empty">💰 対象期間の売上データがありません</div>';
+    return;
+  }
+
+  // 集計
+  const totalProfit   = list.reduce((s,r) => s + r.profit, 0);
+  const eachShare     = totalProfit / 2; // 50:50
+
+  // たいれんが立替えた仕入れ代合計
+  const tairenPaidTotal = list.reduce((s,r) => s + (r.tairenPaid || r.purchasePrice || 0), 0);
+  // りょうが立替えたパーツ代合計
+  const ryoPaidTotal    = list.reduce((s,r) => s + (r.ryoPaid || r.partsCost || 0), 0);
+
+  // 精算計算
+  // たいれんの受取 = 取り分 + りょうへ請求(仕入れ立替の半分) - たいれんへ請求(パーツ立替の半分)
+  // りょうの受取   = 取り分 + たいれんへ請求(パーツ立替の半分) - りょうへ請求(仕入れ立替の半分)
+  const tairenReceives = eachShare + (tairenPaidTotal / 2) - (ryoPaidTotal / 2);
+  const ryoReceives    = eachShare + (ryoPaidTotal / 2) - (tairenPaidTotal / 2);
+  const diff           = tairenReceives - ryoReceives;
+
+  // りょう → たいれん の支払額
+  // diff > 0 → りょうがたいれんに払う
+  // diff < 0 → たいれんがりょうに払う
+  const payAmount = Math.abs(Math.round(diff / 2));
+  const payDirection = diff > 0
+    ? `りょう → たいれん`
+    : diff < 0
+    ? `たいれん → りょう`
+    : '精算なし（イーブン）';
+
+  const periodLabel = period === 'thismonth' ? thisMonth : period === 'lastmonth' ? lastMonth : '全期間';
+
+  const html = `
+    <div class="seisan-result ${diff === 0 ? 'even' : 'pay'}">
+      <div class="seisan-who">${periodLabel} の精算結果</div>
+      <div class="seisan-amount">${diff === 0 ? 'イーブン！' : fmt(payAmount)}</div>
+      <div class="seisan-label">${payDirection}</div>
+    </div>
+
+    <div class="card">
+      <h2>📊 内訳</h2>
+      <div class="seisan-detail-row"><span>📦 売上件数</span><span class="s-val">${list.length}件</span></div>
+      <div class="seisan-detail-row"><span>💰 純利益合計</span><span class="s-val">${fmt(totalProfit)}</span></div>
+      <div class="seisan-detail-row"><span>各自の取り分（50%）</span><span class="s-val">${fmt(eachShare)}</span></div>
+    </div>
+
+    <div class="card">
+      <h2>💳 立替内訳</h2>
+      <div class="seisan-detail-row">
+        <span>たいれん立替（仕入れ代）</span>
+        <span class="s-val tairen">${fmt(tairenPaidTotal)}</span>
+      </div>
+      <div class="seisan-detail-row">
+        <span>　うち回収すべき額</span>
+        <span class="s-val tairen">+${fmt(tairenPaidTotal/2)}</span>
+      </div>
+      <div class="seisan-detail-row">
+        <span>りょう立替（パーツ代）</span>
+        <span class="s-val ryo">${fmt(ryoPaidTotal)}</span>
+      </div>
+      <div class="seisan-detail-row">
+        <span>　うち回収すべき額</span>
+        <span class="s-val ryo">+${fmt(ryoPaidTotal/2)}</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>👤 各自の最終受取額</h2>
+      <div class="seisan-detail-row">
+        <span>たいれん</span>
+        <span class="s-val tairen">${fmt(tairenReceives)}</span>
+      </div>
+      <div class="seisan-detail-row">
+        <span>りょう</span>
+        <span class="s-val ryo">${fmt(ryoReceives)}</span>
+      </div>
+    </div>
+  `;
+  document.getElementById('seisan-content').innerHTML = html;
+};
+
 // ========== 売上サマリー ==========
 let urageTab = 'summary';
-
 window.loadUriage = async function() {
   document.getElementById('u-content').innerHTML = '<div class="loading">⏳ 読み込み中...</div>';
   const snap = await getDocs(query(collection(db, 'uriage'), orderBy('createdAt', 'desc')));
@@ -578,17 +728,14 @@ function renderUriage(list, tab) {
   const totalSales  = list.reduce((s,r) => s + r.sellPrice, 0);
   const totalProfit = list.reduce((s,r) => s + r.profit, 0);
   const avgRate     = list.reduce((s,r) => s + r.profitRate, 0) / list.length;
-
   const tabBar = `<div class="tab-bar">
-    <button class="tab-btn ${tab==='summary'?'active':''}"  onclick="switchUriageTab('summary')">📊 サマリー</button>
-    <button class="tab-btn ${tab==='monthly'?'active':''}"  onclick="switchUriageTab('monthly')">📅 月別</button>
-    <button class="tab-btn ${tab==='weekly'?'active':''}"   onclick="switchUriageTab('weekly')">📅 週別</button>
-    <button class="tab-btn ${tab==='model'?'active':''}"    onclick="switchUriageTab('model')">📱 機種別</button>
-    <button class="tab-btn ${tab==='profit'?'active':''}"   onclick="switchUriageTab('profit')">💰 利益額</button>
+    <button class="tab-btn ${tab==='summary'?'active':''}" onclick="switchUriageTab('summary')">📊 サマリー</button>
+    <button class="tab-btn ${tab==='monthly'?'active':''}" onclick="switchUriageTab('monthly')">📅 月別</button>
+    <button class="tab-btn ${tab==='weekly'?'active':''}"  onclick="switchUriageTab('weekly')">📅 週別</button>
+    <button class="tab-btn ${tab==='model'?'active':''}"   onclick="switchUriageTab('model')">📱 機種別</button>
+    <button class="tab-btn ${tab==='profit'?'active':''}"  onclick="switchUriageTab('profit')">💰 利益額</button>
   </div>`;
-
   let body = '';
-
   if (tab === 'summary') {
     const profits = list.map(r => r.profit);
     body = `<div class="kpi-grid">
@@ -603,107 +750,68 @@ function renderUriage(list, tab) {
     ${list.slice(0,20).map(r => `
       <div class="item-card" style="border-left-color:#2E7D32">
         <div class="item-top">
-          <div><div class="item-model">${r.model} ${r.capacity}</div><div class="item-id">${r.date} | ${r.invId}</div></div>
+          <div><div class="item-model">${r.model} ${r.capacity}</div><div class="item-id">${r.date} | ${r.invId}${r.account ? ' | '+r.account : ''}</div></div>
           <div style="text-align:right">
             <div class="item-profit ${r.profit<0?'neg':''}">${fmt(r.profit)}</div>
             <div style="font-size:11px;color:#888">${Math.round(r.profitRate*1000)/10}%</div>
           </div>
         </div>
       </div>`).join('')}`;
-
   } else if (tab === 'monthly') {
-    // 月別集計
     const map = {};
     list.forEach(r => {
       const key = r.date ? r.date.slice(0,7) : '不明';
       if (!map[key]) map[key] = {profit:0, count:0};
-      map[key].profit += r.profit;
-      map[key].count++;
+      map[key].profit += r.profit; map[key].count++;
     });
     const sorted = Object.entries(map).sort((a,b) => b[0].localeCompare(a[0]));
-    body = `<div class="card"><h2>📅 月別利益</h2>${
-      sorted.map(([month, d]) => `
-        <div class="period-row">
-          <div><div class="period-label">${month}</div><div class="period-sub">${d.count}件</div></div>
-          <div class="period-right">
-            <div class="period-profit">${fmt(d.profit)}</div>
-            <div class="period-count">平均 ${fmt(d.profit/d.count)}/件</div>
-          </div>
-        </div>`).join('')
-    }</div>`;
-
+    body = `<div class="card"><h2>📅 月別利益</h2>${sorted.map(([month, d]) => `
+      <div class="period-row">
+        <div><div class="period-label">${month}</div><div class="period-sub">${d.count}件</div></div>
+        <div class="period-right"><div class="period-profit">${fmt(d.profit)}</div><div class="period-count">平均 ${fmt(d.profit/d.count)}/件</div></div>
+      </div>`).join('')}</div>`;
   } else if (tab === 'weekly') {
-    // 週別集計
     const map = {};
     list.forEach(r => {
       if (!r.date) return;
-      const d = new Date(r.date);
-      const day = d.getDay();
-      const monday = new Date(d);
-      monday.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
+      const d = new Date(r.date); const day = d.getDay();
+      const monday = new Date(d); monday.setDate(d.getDate() - (day===0?6:day-1));
       const key = monday.toISOString().slice(0,10);
-      if (!map[key]) map[key] = {profit:0, count:0, end: ''};
-      map[key].profit += r.profit;
-      map[key].count++;
-      const sunday = new Date(monday);
-      sunday.setDate(monday.getDate() + 6);
+      if (!map[key]) map[key] = {profit:0, count:0, end:''};
+      map[key].profit += r.profit; map[key].count++;
+      const sunday = new Date(monday); sunday.setDate(monday.getDate()+6);
       map[key].end = sunday.toISOString().slice(0,10);
     });
     const sorted = Object.entries(map).sort((a,b) => b[0].localeCompare(a[0]));
-    body = `<div class="card"><h2>📅 週別利益</h2>${
-      sorted.map(([start, d]) => `
-        <div class="period-row">
-          <div><div class="period-label">${start} 〜</div><div class="period-sub">${d.end} (${d.count}件)</div></div>
-          <div class="period-right">
-            <div class="period-profit">${fmt(d.profit)}</div>
-            <div class="period-count">平均 ${fmt(d.profit/d.count)}/件</div>
-          </div>
-        </div>`).join('')
-    }</div>`;
-
+    body = `<div class="card"><h2>📅 週別利益</h2>${sorted.map(([start, d]) => `
+      <div class="period-row">
+        <div><div class="period-label">${start} 〜</div><div class="period-sub">${d.end} (${d.count}件)</div></div>
+        <div class="period-right"><div class="period-profit">${fmt(d.profit)}</div><div class="period-count">平均 ${fmt(d.profit/d.count)}/件</div></div>
+      </div>`).join('')}</div>`;
   } else if (tab === 'model') {
-    // 機種別ランキング（件数順）
     const map = {};
-    list.forEach(r => {
-      const key = r.model;
-      if (!map[key]) map[key] = {profit:0, count:0};
-      map[key].profit += r.profit;
-      map[key].count++;
-    });
+    list.forEach(r => { if (!map[r.model]) map[r.model]={profit:0,count:0}; map[r.model].profit+=r.profit; map[r.model].count++; });
     const sorted = Object.entries(map).sort((a,b) => b[1].count - a[1].count);
     const medals = ['gold','silver','bronze'];
-    body = `<div class="card"><h2>📱 機種別ランキング（件数順）</h2>${
-      sorted.map(([model, d], i) => `
-        <div class="rank-row">
-          <div class="rank-num ${medals[i]||''}">${i+1}</div>
-          <div class="rank-label"><div style="font-weight:600">${model}</div><div style="font-size:11px;color:#888">${d.count}件 / 平均 ${fmt(d.profit/d.count)}</div></div>
-          <div class="rank-val">${fmt(d.profit)}</div>
-        </div>`).join('')
-    }</div>`;
-
+    body = `<div class="card"><h2>📱 機種別ランキング（件数順）</h2>${sorted.map(([model,d],i) => `
+      <div class="rank-row">
+        <div class="rank-num ${medals[i]||''}">${i+1}</div>
+        <div class="rank-label"><div style="font-weight:600">${model}</div><div style="font-size:11px;color:#888">${d.count}件 / 平均 ${fmt(d.profit/d.count)}</div></div>
+        <div class="rank-val">${fmt(d.profit)}</div>
+      </div>`).join('')}</div>`;
   } else if (tab === 'profit') {
-    // 利益額ランキング（機種別総利益）
     const map = {};
-    list.forEach(r => {
-      const key = r.model;
-      if (!map[key]) map[key] = {profit:0, count:0};
-      map[key].profit += r.profit;
-      map[key].count++;
-    });
+    list.forEach(r => { if (!map[r.model]) map[r.model]={profit:0,count:0}; map[r.model].profit+=r.profit; map[r.model].count++; });
     const sorted = Object.entries(map).sort((a,b) => b[1].profit - a[1].profit);
     const medals = ['gold','silver','bronze'];
-    body = `<div class="card"><h2>💰 利益額ランキング（機種別）</h2>${
-      sorted.map(([model, d], i) => `
-        <div class="rank-row">
-          <div class="rank-num ${medals[i]||''}">${i+1}</div>
-          <div class="rank-label"><div style="font-weight:600">${model}</div><div style="font-size:11px;color:#888">${d.count}件 / 平均 ${fmt(d.profit/d.count)}</div></div>
-          <div class="rank-val">${fmt(d.profit)}</div>
-        </div>`).join('')
-    }</div>`;
+    body = `<div class="card"><h2>💰 利益額ランキング（機種別）</h2>${sorted.map(([model,d],i) => `
+      <div class="rank-row">
+        <div class="rank-num ${medals[i]||''}">${i+1}</div>
+        <div class="rank-label"><div style="font-weight:600">${model}</div><div style="font-size:11px;color:#888">${d.count}件 / 平均 ${fmt(d.profit/d.count)}</div></div>
+        <div class="rank-val">${fmt(d.profit)}</div>
+      </div>`).join('')}</div>`;
   }
-
   document.getElementById('u-content').innerHTML = tabBar + body;
-  // タブ切り替え用にlistをキャッシュ
   window._uraigeList = list;
 }
 

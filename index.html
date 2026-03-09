@@ -268,6 +268,10 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
         <label>発送送料（円）</label>
         <input type="number" id="modal-shipping" placeholder="例: 520" inputmode="numeric">
       </div>
+      <div id="modal-profit-preview" style="display:none;margin-top:12px;padding:12px;border-radius:10px;text-align:center;">
+        <div style="font-size:11px;color:#666;margin-bottom:4px;">計算式: 売却価格 - 手数料 - 送料 - 仕入れ値 - バッテリー - パネル - パーツ送料</div>
+        <div id="modal-profit-val" style="font-size:20px;font-weight:800;"></div>
+      </div>
     </div>
     <div class="modal-btns">
       <button class="modal-cancel" onclick="closeModal()">キャンセル</button>
@@ -608,6 +612,33 @@ window.copyTemplate = function() {
 
 // ========== ステータス・売却モーダル ==========
 let isSellMode = false;
+function calcModalProfit() {
+  const item = zaikoList.find(r => r.docId === currentDocId);
+  if (!item) return;
+  const sellPrice   = Number(document.getElementById('modal-sell-price').value)      || 0;
+  const battery     = Number(document.getElementById('modal-battery').value)         || 0;
+  const frontPanel  = Number(document.getElementById('modal-front-panel').value)     || 0;
+  const partsSend   = Number(document.getElementById('modal-parts-sending').value)   || 0;
+  const fee         = Number(document.getElementById('modal-fee').value)             || (sellPrice > 0 ? Math.ceil(sellPrice * 0.1) : 0);
+  const shipping    = Number(document.getElementById('modal-shipping').value)        || 520;
+  const purchase    = item.purchasePrice || 0;
+  const profit      = sellPrice - fee - shipping - purchase - battery - frontPanel - partsSend;
+  const preview     = document.getElementById('modal-profit-preview');
+  const val         = document.getElementById('modal-profit-val');
+  if (sellPrice <= 0) {
+    preview.style.background = '#f8f8f8';
+    val.style.color = '#999';
+    val.textContent = '売却価格を入力してください';
+    return;
+  }
+  const isPos = profit >= 0;
+  preview.style.background = isPos ? '#E8F5E9' : '#FFEBEE';
+  val.style.color = isPos ? '#2E7D32' : '#C62828';
+  const formula = `${sellPrice.toLocaleString()} - ${fee.toLocaleString()}(手数料) - ${shipping.toLocaleString()}(送料) - ${purchase.toLocaleString()}(仕入) - ${battery.toLocaleString()}(BT) - ${frontPanel.toLocaleString()}(FP) - ${partsSend.toLocaleString()}(部品送料)`;
+  document.querySelector('#modal-profit-preview div').textContent = formula;
+  val.textContent = (isPos ? '+' : '') + profit.toLocaleString() + '円';
+}
+
 window.openModal = function(docId, status, sellMode) {
   currentDocId = docId;
   isSellMode = sellMode;
@@ -626,17 +657,24 @@ window.openModal = function(docId, status, sellMode) {
       document.getElementById('modal-fee').value           = item.fee           || '';
       document.getElementById('modal-shipping').value      = item.shipping      || 520;
     }
-    // 売却価格入力時に手数料を自動計算
+    // 売却価格入力時に手数料を自動計算 + 利益プレビュー更新
     document.getElementById('modal-sell-price').oninput = function() {
       const sp = Number(this.value);
       if (sp > 0) document.getElementById('modal-fee').value = Math.ceil(sp * 0.1);
+      calcModalProfit();
     };
+    ['modal-battery','modal-front-panel','modal-parts-sending','modal-fee','modal-shipping'].forEach(id => {
+      document.getElementById(id).oninput = calcModalProfit;
+    });
+    document.getElementById('modal-profit-preview').style.display = 'block';
+    calcModalProfit();
   }
   document.getElementById('statusModal').classList.add('show');
 };
 
 window.closeModal = function() {
   document.getElementById('statusModal').classList.remove('show');
+  document.getElementById('modal-profit-preview').style.display = 'none';
 };
 
 window.applyStatus = async function() {

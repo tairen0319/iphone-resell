@@ -621,7 +621,8 @@ function calcModalProfit() {
   const partsSend   = Number(document.getElementById('modal-parts-sending').value)   || 0;
   const feeEl = document.getElementById('modal-fee');
   const fee   = feeEl.value !== '' ? Number(feeEl.value) : (sellPrice > 0 ? Math.ceil(sellPrice * 0.1) : 0);
-  const shipping    = Number(document.getElementById('modal-shipping').value)        || 520;
+  const shippingEl  = document.getElementById('modal-shipping');
+  const shipping    = shippingEl.value !== '' ? Number(shippingEl.value) : 520;
   const purchase    = item.purchasePrice || 0;
   const profit      = sellPrice - fee - shipping - purchase - battery - frontPanel - partsSend;
   const preview     = document.getElementById('modal-profit-preview');
@@ -656,7 +657,7 @@ window.openModal = function(docId, status, sellMode) {
       document.getElementById('modal-front-panel').value   = item.frontPanel    || 0;
       document.getElementById('modal-parts-sending').value = item.partsSending  || 0;
       document.getElementById('modal-fee').value           = item.fee > 0 ? item.fee : '';
-      document.getElementById('modal-shipping').value      = item.shipping      || 520;
+      document.getElementById('modal-shipping').value      = item.shipping > 0 ? item.shipping : 520;
     }
     // 売却価格入力時に手数料を自動計算 + 利益プレビュー更新
     document.getElementById('modal-sell-price').oninput = function() {
@@ -691,7 +692,8 @@ window.applyStatus = async function() {
     const partsSending = Number(document.getElementById('modal-parts-sending').value)|| 0;
     const feeInput     = document.getElementById('modal-fee');
     const fee          = feeInput.value !== '' ? Number(feeInput.value) : Math.ceil(sellPrice * 0.1);
-    const shipping     = Number(document.getElementById('modal-shipping').value)      || 520;
+    const shippingInput = document.getElementById('modal-shipping');
+    const shipping      = shippingInput.value !== '' ? Number(shippingInput.value) : 520;
     const partsCost    = battery + frontPanel;
     const profit       = sellPrice - fee - shipping - item.purchasePrice - partsCost - partsSending;
     const now          = new Date();

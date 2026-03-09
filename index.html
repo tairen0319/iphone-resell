@@ -69,6 +69,7 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
 .btn-status{background:#E3F2FD;color:#1565C0;}
 .btn-sell{background:#E8F5E9;color:#2E7D32;}
 .btn-template{background:#F3E5F5;color:#7B1FA2;}
+.btn-memo{background:#FFF8E1;color:#F57F17;}
 .btn-delete{background:#FFEBEE;color:#C62828;}
 .kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
 .kpi-card{background:white;border-radius:14px;padding:14px;box-shadow:0 2px 6px rgba(0,0,0,0.07);text-align:center;}
@@ -133,10 +134,13 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
 .souba-row:last-child{border-bottom:none;}
 .souba-price{font-weight:700;color:#1565C0;}
 .footer{text-align:center;color:#aaa;font-size:11px;padding:20px;}
+.channel-chip{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600;margin-left:6px;}
+.channel-mercari{background:#FF6B6B22;color:#CC0000;}
+.channel-jimoty{background:#4CAF5022;color:#2E7D32;}
+.channel-other{background:#9E9E9E22;color:#555;}
 </style>
 </head>
 <body>
-
 <!-- ダッシュボード -->
 <div id="page-dashboard" class="page active">
   <div class="header"><h1>📱 iPhone転売管理</h1></div>
@@ -154,7 +158,6 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
   </div>
   <div class="footer">Firebase同期 | iPhone転売管理</div>
 </div>
-
 <!-- 仕入れ判断 -->
 <div id="page-shiire" class="page">
   <div class="header"><button class="back-btn" onclick="showPage('dashboard')">←</button><h1>🔍 仕入れ判断</h1></div>
@@ -189,7 +192,6 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
     </div>
   </div>
 </div>
-
 <!-- 在庫一覧 -->
 <div id="page-zaiko" class="page">
   <div class="header"><button class="back-btn" onclick="showPage('dashboard')">←</button><h1>📦 在庫一覧</h1><button class="reload-btn" onclick="loadZaiko()">↻</button></div>
@@ -202,13 +204,11 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
     <div id="z-list"><div class="loading">⏳ 読み込み中...</div></div>
   </div>
 </div>
-
 <!-- 売上サマリー -->
 <div id="page-uriage" class="page">
   <div class="header"><button class="back-btn" onclick="showPage('dashboard')">←</button><h1>💰 売上サマリー</h1><button class="reload-btn" onclick="loadUriage()">↻</button></div>
   <div class="container"><div id="u-content"><div class="loading">⏳ 読み込み中...</div></div></div>
 </div>
-
 <!-- 相場管理 -->
 <div id="page-souba" class="page">
   <div class="header"><button class="back-btn" onclick="showPage('dashboard')">←</button><h1>📊 相場管理</h1></div>
@@ -224,7 +224,6 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
     <div class="card"><h2>📋 現在の相場一覧</h2><div id="so-list"><div class="loading">⏳ 読み込み中...</div></div></div>
   </div>
 </div>
-
 <!-- 精算管理 -->
 <div id="page-seisan" class="page">
   <div class="header"><button class="back-btn" onclick="showPage('dashboard')">←</button><h1>🤝 精算管理</h1><button class="reload-btn" onclick="loadSeisan()">↻</button></div>
@@ -240,7 +239,6 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
     <div id="seisan-content"><div class="loading">⏳ 読み込み中...</div></div>
   </div>
 </div>
-
 <!-- ステータス変更モーダル -->
 <div class="modal-overlay" id="statusModal">
   <div class="modal">
@@ -250,6 +248,12 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
     <div id="modal-sell-area" style="display:none;margin-top:12px">
       <label>売却価格（円）</label>
       <input type="number" id="modal-sell-price" placeholder="例: 18000" inputmode="numeric">
+      <label>販売先</label>
+      <select id="modal-channel">
+        <option value="メルカリ">メルカリ</option>
+        <option value="ジモティー">ジモティー</option>
+        <option value="その他">その他</option>
+      </select>
       <label>出品アカウント</label>
       <select id="modal-account">
         <option value="たいれん">たいれん</option>
@@ -263,8 +267,8 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
         <input type="number" id="modal-front-panel" placeholder="例: 3000" inputmode="numeric">
         <label>パーツ送料（円）</label>
         <input type="number" id="modal-parts-sending" placeholder="例: 770" inputmode="numeric">
-        <label>メルカリ手数料（円）</label>
-        <input type="number" id="modal-fee" placeholder="自動計算" inputmode="numeric">
+        <label>手数料（円）</label>
+        <input type="number" id="modal-fee" placeholder="自動計算（メルカリ10%）" inputmode="numeric">
         <label>発送送料（円）</label>
         <input type="number" id="modal-shipping" placeholder="例: 520" inputmode="numeric">
       </div>
@@ -279,8 +283,7 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
     </div>
   </div>
 </div>
-
-<!-- 削除確認モーダル ★新規 -->
+<!-- 削除確認モーダル -->
 <div class="modal-overlay" id="deleteModal">
   <div class="modal">
     <h3>🗑️ 削除確認</h3>
@@ -292,7 +295,18 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
     </div>
   </div>
 </div>
-
+<!-- メモ編集モーダル -->
+<div class="modal-overlay" id="memoModal">
+  <div class="modal">
+    <h3>📝 メモを編集</h3>
+    <label>メモ</label>
+    <textarea id="memo-input" placeholder="例: バッテリー膨張あり、画面キズ小" rows="4" style="resize:vertical;"></textarea>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeMemoModal()">キャンセル</button>
+      <button class="modal-ok" onclick="saveMemo()">保存</button>
+    </div>
+  </div>
+</div>
 <!-- 出品テンプレモーダル -->
 <div class="modal-overlay" id="templateModal">
   <div class="modal">
@@ -311,9 +325,7 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
     <button class="modal-cancel" onclick="closeTemplateModal()" style="width:100%;padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px">閉じる</button>
   </div>
 </div>
-
 <div class="toast" id="toast"></div>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
 import { getFirestore, collection, getDocs, addDoc, doc, updateDoc, deleteDoc, setDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -329,12 +341,10 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 window._db = db;
 window._firebase = { collection, getDocs, addDoc, doc, updateDoc, deleteDoc, setDoc, query, orderBy };
-
 window.addEventListener('load', async () => {
   await initSouba();
   loadSoubaSelects();
 });
-
 async function initSouba() {
   const snap = await getDocs(collection(db, 'souba'));
   if (snap.size > 0) { loadSoubaList(); return; }
@@ -345,7 +355,6 @@ async function initSouba() {
   }
   loadSoubaList();
 }
-
 window.showPage = function(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
@@ -355,7 +364,6 @@ window.showPage = function(name) {
   if (name === 'souba')  loadSoubaList();
   if (name === 'seisan') loadSeisan();
 };
-
 let soubaData = [];
 async function loadSoubaList() {
   const snap = await getDocs(collection(db, 'souba'));
@@ -371,7 +379,6 @@ async function loadSoubaList() {
     </div>`).join('');
   loadSoubaSelects();
 }
-
 function loadSoubaSelects() {
   const models = [...new Set(soubaData.map(s => s.model))];
   const sel = document.getElementById('s-model');
@@ -385,7 +392,6 @@ function loadSoubaSelects() {
     };
   }
 }
-
 window.updateSouba = async function() {
   const model = document.getElementById('so-model').value;
   const cap   = document.getElementById('so-cap').value;
@@ -396,7 +402,6 @@ window.updateSouba = async function() {
   document.getElementById('so-price').value = '';
   loadSoubaList();
 };
-
 let lastCalc = null;
 window.calcProfit = function() {
   const model  = document.getElementById('s-model').value;
@@ -431,7 +436,6 @@ window.calcProfit = function() {
   document.getElementById('s-loading').style.display = 'none';
   document.getElementById('s-result').style.display = 'block';
 };
-
 window.confirmPurchase = async function() {
   if (!lastCalc) return;
   const memo = document.getElementById('s-memo').value;
@@ -452,19 +456,17 @@ window.confirmPurchase = async function() {
   showToast('✅ 在庫に追加！ ID: ' + id);
   resetShiire();
 };
-
 window.resetShiire = function() {
   ['s-model','s-capacity','s-screen','s-memo'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('s-price').value = '';
   document.getElementById('s-result').style.display = 'none';
   lastCalc = null;
 };
-
 // ========== 在庫一覧 ==========
 let zaikoList = [];
 let currentDocId = null;
 let templateItem = null;
-
+let memoDocId = null;
 window.loadZaiko = async function() {
   document.getElementById('z-list').innerHTML = '<div class="loading">⏳ 読み込み中...</div>';
   const snap = await getDocs(query(collection(db, 'zaiko'), orderBy('createdAt', 'desc')));
@@ -472,7 +474,6 @@ window.loadZaiko = async function() {
   snap.forEach(d => zaikoList.push({docId: d.id, ...d.data()}));
   renderZaiko();
 };
-
 function renderZaiko() {
   const today = new Date(); today.setHours(0,0,0,0);
   const el = document.getElementById('z-list');
@@ -509,6 +510,7 @@ function renderZaiko() {
         <button class="action-btn btn-status"   onclick="openModal('${r.docId}','${r.status}',false)">📋 ステータス</button>
         <button class="action-btn btn-sell"     onclick="openModal('${r.docId}','${r.status}',true)">💰 売却</button>
         <button class="action-btn btn-template" onclick="openTemplateModal('${r.docId}')">📝 テンプレ</button>
+        <button class="action-btn btn-memo"     onclick="openMemoModal('${r.docId}')">✏️ メモ</button>
         <button class="action-btn btn-delete"   onclick="openDeleteModal('zaiko','${r.docId}','${r.model} ${r.capacity}')">🗑️</button>
       </div>
     </div>`;
@@ -518,21 +520,34 @@ function renderZaiko() {
   document.getElementById('z-profit').textContent = fmt(totalProfit);
   document.getElementById('z-days').textContent   = Math.round(totalDays / zaikoList.length) + '日';
 }
-
-// ========== 削除モーダル ★新規 ==========
+// ========== メモ編集モーダル ==========
+window.openMemoModal = function(docId) {
+  memoDocId = docId;
+  const item = zaikoList.find(r => r.docId === docId);
+  document.getElementById('memo-input').value = item ? (item.memo || '') : '';
+  document.getElementById('memoModal').classList.add('show');
+};
+window.closeMemoModal = function() {
+  document.getElementById('memoModal').classList.remove('show');
+};
+window.saveMemo = async function() {
+  if (!memoDocId) return;
+  const memo = document.getElementById('memo-input').value;
+  await updateDoc(doc(db, 'zaiko', memoDocId), { memo });
+  closeMemoModal();
+  showToast('✅ メモを保存しました');
+  loadZaiko();
+};
+// ========== 削除モーダル ==========
 let deleteTarget = { collection: '', docId: '', label: '' };
-
 window.openDeleteModal = function(col, docId, label) {
   deleteTarget = { collection: col, docId, label };
-  document.getElementById('delete-msg').textContent =
-    `「${label}」を削除してよいですか？`;
+  document.getElementById('delete-msg').textContent = `「${label}」を削除してよいですか？`;
   document.getElementById('deleteModal').classList.add('show');
 };
-
 window.closeDeleteModal = function() {
   document.getElementById('deleteModal').classList.remove('show');
 };
-
 window.execDelete = async function() {
   closeDeleteModal();
   await deleteDoc(doc(db, deleteTarget.collection, deleteTarget.docId));
@@ -540,7 +555,6 @@ window.execDelete = async function() {
   if (deleteTarget.collection === 'zaiko')  loadZaiko();
   if (deleteTarget.collection === 'uriage') loadUriage();
 };
-
 // ========== 出品テンプレ ==========
 window.openTemplateModal = function(docId) {
   templateItem = zaikoList.find(r => r.docId === docId);
@@ -553,11 +567,9 @@ window.openTemplateModal = function(docId) {
   document.getElementById('tmpl-copy-btn').classList.remove('copied');
   document.getElementById('templateModal').classList.add('show');
 };
-
 window.closeTemplateModal = function() {
   document.getElementById('templateModal').classList.remove('show');
 };
-
 window.generateTemplate = function() {
   if (!templateItem) return;
   const imei        = document.getElementById('tmpl-imei').value   || '【IMEIを入力】';
@@ -573,7 +585,7 @@ window.generateTemplate = function() {
 機種名：${templateItem.model}
 容量：${templateItem.capacity}
 SIMフリー（ロック解除済）
-ネットワーク利用制限：〇 
+ネットワーク利用制限：〇
 アクティベーションロック：解除済
 初期化：全て初期化済
 IMEI：${imei}
@@ -599,7 +611,6 @@ Face ID：使用可能
   document.getElementById('tmpl-text').value = text;
   document.getElementById('tmpl-result').style.display = 'block';
 };
-
 window.copyTemplate = function() {
   const text = document.getElementById('tmpl-text').value;
   navigator.clipboard.writeText(text).then(() => {
@@ -609,24 +620,23 @@ window.copyTemplate = function() {
     setTimeout(() => { btn.textContent = '📋 コピーする'; btn.classList.remove('copied'); }, 2500);
   });
 };
-
 // ========== ステータス・売却モーダル ==========
 let isSellMode = false;
 function calcModalProfit() {
   const item = zaikoList.find(r => r.docId === currentDocId);
   if (!item) return;
-  const sellPrice   = Number(document.getElementById('modal-sell-price').value)      || 0;
-  const battery     = Number(document.getElementById('modal-battery').value)         || 0;
-  const frontPanel  = Number(document.getElementById('modal-front-panel').value)     || 0;
-  const partsSend   = Number(document.getElementById('modal-parts-sending').value)   || 0;
-  const feeEl = document.getElementById('modal-fee');
-  const fee   = feeEl.value !== '' ? Number(feeEl.value) : (sellPrice > 0 ? Math.ceil(sellPrice * 0.1) : 0);
-  const shippingEl  = document.getElementById('modal-shipping');
-  const shipping    = shippingEl.value !== '' ? Number(shippingEl.value) : 520;
-  const purchase    = item.purchasePrice || 0;
-  const profit      = sellPrice - fee - shipping - purchase - battery - frontPanel - partsSend;
-  const preview     = document.getElementById('modal-profit-preview');
-  const val         = document.getElementById('modal-profit-val');
+  const sellPrice  = Number(document.getElementById('modal-sell-price').value) || 0;
+  const battery    = Number(document.getElementById('modal-battery').value)    || 0;
+  const frontPanel = Number(document.getElementById('modal-front-panel').value)|| 0;
+  const partsSend  = Number(document.getElementById('modal-parts-sending').value) || 0;
+  const feeEl      = document.getElementById('modal-fee');
+  const fee        = feeEl.value !== '' ? Number(feeEl.value) : (sellPrice > 0 ? Math.ceil(sellPrice * 0.1) : 0);
+  const shippingEl = document.getElementById('modal-shipping');
+  const shipping   = shippingEl.value !== '' ? Number(shippingEl.value) : 520;
+  const purchase   = item.purchasePrice || 0;
+  const profit     = sellPrice - fee - shipping - purchase - battery - frontPanel - partsSend;
+  const preview    = document.getElementById('modal-profit-preview');
+  const val        = document.getElementById('modal-profit-val');
   if (sellPrice <= 0) {
     preview.style.background = '#f8f8f8';
     val.style.color = '#999';
@@ -640,7 +650,6 @@ function calcModalProfit() {
   document.querySelector('#modal-profit-preview div').textContent = formula;
   val.textContent = (isPos ? '+' : '') + profit.toLocaleString() + '円';
 }
-
 window.openModal = function(docId, status, sellMode) {
   currentDocId = docId;
   isSellMode = sellMode;
@@ -650,19 +659,30 @@ window.openModal = function(docId, status, sellMode) {
   document.getElementById('modal-sell-area').style.display = sellMode ? 'block' : 'none';
   document.getElementById('modal-sell-price').value = '';
   document.getElementById('modal-account').value = 'たいれん';
+  document.getElementById('modal-channel').value = 'メルカリ';
   if (sellMode) {
     const item = zaikoList.find(r => r.docId === docId);
     if (item) {
-      document.getElementById('modal-battery').value       = item.battery       || 0;
-      document.getElementById('modal-front-panel').value   = item.frontPanel    || 0;
-      document.getElementById('modal-parts-sending').value = item.partsSending  || 0;
+      document.getElementById('modal-battery').value       = item.battery      || 0;
+      document.getElementById('modal-front-panel').value   = item.frontPanel   || 0;
+      document.getElementById('modal-parts-sending').value = item.partsSending || 0;
       document.getElementById('modal-fee').value           = item.fee > 0 ? item.fee : '';
       document.getElementById('modal-shipping').value      = item.shipping > 0 ? item.shipping : 520;
     }
-    // 売却価格入力時に手数料を自動計算 + 利益プレビュー更新
     document.getElementById('modal-sell-price').oninput = function() {
       const sp = Number(this.value);
-      if (sp > 0) document.getElementById('modal-fee').value = Math.ceil(sp * 0.1);
+      const channel = document.getElementById('modal-channel').value;
+      if (sp > 0 && channel === 'メルカリ') document.getElementById('modal-fee').value = Math.ceil(sp * 0.1);
+      calcModalProfit();
+    };
+    document.getElementById('modal-channel').onchange = function() {
+      const sp = Number(document.getElementById('modal-sell-price').value);
+      if (this.value === 'メルカリ' && sp > 0) {
+        document.getElementById('modal-fee').value = Math.ceil(sp * 0.1);
+      } else if (this.value === 'ジモティー') {
+        document.getElementById('modal-fee').value = 0;
+        document.getElementById('modal-shipping').value = 0;
+      }
       calcModalProfit();
     };
     ['modal-battery','modal-front-panel','modal-parts-sending','modal-fee','modal-shipping'].forEach(id => {
@@ -673,23 +693,22 @@ window.openModal = function(docId, status, sellMode) {
   }
   document.getElementById('statusModal').classList.add('show');
 };
-
 window.closeModal = function() {
   document.getElementById('statusModal').classList.remove('show');
   document.getElementById('modal-profit-preview').style.display = 'none';
 };
-
 window.applyStatus = async function() {
   const item = zaikoList.find(r => r.docId === currentDocId);
   if (!item) return;
   closeModal();
   if (isSellMode) {
-    const sellPrice   = Number(document.getElementById('modal-sell-price').value);
-    const account     = document.getElementById('modal-account').value;
+    const sellPrice = Number(document.getElementById('modal-sell-price').value);
+    const account   = document.getElementById('modal-account').value;
+    const channel   = document.getElementById('modal-channel').value;
     if (!sellPrice || sellPrice <= 0) { showToast('⚠️ 売却価格を入力してください'); return; }
-    const battery      = Number(document.getElementById('modal-battery').value)      || 0;
-    const frontPanel   = Number(document.getElementById('modal-front-panel').value)  || 0;
-    const partsSending = Number(document.getElementById('modal-parts-sending').value)|| 0;
+    const battery      = Number(document.getElementById('modal-battery').value)       || 0;
+    const frontPanel   = Number(document.getElementById('modal-front-panel').value)   || 0;
+    const partsSending = Number(document.getElementById('modal-parts-sending').value) || 0;
     const feeInput     = document.getElementById('modal-fee');
     const fee          = feeInput.value !== '' ? Number(feeInput.value) : Math.ceil(sellPrice * 0.1);
     const shippingInput = document.getElementById('modal-shipping');
@@ -704,7 +723,7 @@ window.applyStatus = async function() {
       battery, frontPanel, partsSending,
       tairenPaid: item.tairenPaid || item.purchasePrice || 0,
       ryoPaid: item.ryoPaid || partsCost || 0,
-      account, sellPrice, fee, shipping,
+      account, channel, sellPrice, fee, shipping,
       totalCost: item.purchasePrice + partsCost + partsSending + fee + shipping,
       profit, profitRate: sellPrice > 0 ? profit/sellPrice : 0,
       mercariUrl: item.mercariUrl || '',
@@ -719,7 +738,6 @@ window.applyStatus = async function() {
   }
   loadZaiko();
 };
-
 // ========== 精算管理 ==========
 window.loadSeisan = async function() {
   const period = document.getElementById('seisan-period')?.value || 'thismonth';
@@ -772,11 +790,9 @@ window.loadSeisan = async function() {
       <div class="seisan-detail-row"><span>りょう</span><span class="s-val ryo">${fmt(ryoReceives)}</span></div>
     </div>`;
 };
-
 // ========== 売上サマリー ==========
 let urageTab = 'summary';
-let uraigeDocIds = []; // 削除用にdocIdを保持
-
+let uraigeDocIds = [];
 window.loadUriage = async function() {
   document.getElementById('u-content').innerHTML = '<div class="loading">⏳ 読み込み中...</div>';
   const snap = await getDocs(query(collection(db, 'uriage'), orderBy('createdAt', 'desc')));
@@ -789,7 +805,11 @@ window.loadUriage = async function() {
   }
   renderUriage(list, urageTab);
 };
-
+function channelChip(channel) {
+  if (!channel) return '';
+  const cls = channel === 'メルカリ' ? 'channel-mercari' : channel === 'ジモティー' ? 'channel-jimoty' : 'channel-other';
+  return `<span class="channel-chip ${cls}">${channel}</span>`;
+}
 function renderUriage(list, tab) {
   const totalSales  = list.reduce((s,r) => s + r.sellPrice, 0);
   const totalProfit = list.reduce((s,r) => s + r.profit, 0);
@@ -800,6 +820,7 @@ function renderUriage(list, tab) {
     <button class="tab-btn ${tab==='weekly'?'active':''}"  onclick="switchUriageTab('weekly')">📅 週別</button>
     <button class="tab-btn ${tab==='model'?'active':''}"   onclick="switchUriageTab('model')">📱 機種別</button>
     <button class="tab-btn ${tab==='profit'?'active':''}"  onclick="switchUriageTab('profit')">💰 利益額</button>
+    <button class="tab-btn ${tab==='channel'?'active':''}" onclick="switchUriageTab('channel')">🏪 販売先</button>
   </div>`;
   let body = '';
   if (tab === 'summary') {
@@ -816,7 +837,7 @@ function renderUriage(list, tab) {
     ${uraigeDocIds.slice(0,20).map(r => `
       <div class="item-card" style="border-left-color:#2E7D32">
         <div class="item-top">
-          <div><div class="item-model">${r.model} ${r.capacity}</div><div class="item-id">${r.date} | ${r.invId}${r.account ? ' | '+r.account : ''}</div></div>
+          <div><div class="item-model">${r.model} ${r.capacity}${channelChip(r.channel)}</div><div class="item-id">${r.date} | ${r.invId}${r.account ? ' | '+r.account : ''}</div></div>
           <div style="text-align:right">
             <div class="item-profit ${r.profit<0?'neg':''}">${fmt(r.profit)}</div>
             <div style="font-size:11px;color:#888">${Math.round(r.profitRate*1000)/10}%</div>
@@ -874,16 +895,23 @@ function renderUriage(list, tab) {
         <div class="rank-label"><div style="font-weight:600">${model}</div><div style="font-size:11px;color:#888">${d.count}件 / 平均 ${fmt(d.profit/d.count)}</div></div>
         <div class="rank-val">${fmt(d.profit)}</div>
       </div>`).join('')}</div>`;
+  } else if (tab === 'channel') {
+    const map={};
+    list.forEach(r=>{const ch=r.channel||'不明';if(!map[ch])map[ch]={profit:0,count:0,sales:0};map[ch].profit+=r.profit;map[ch].count++;map[ch].sales+=r.sellPrice;});
+    const sorted=Object.entries(map).sort((a,b)=>b[1].count-a[1].count);
+    body=`<div class="card"><h2>🏪 販売先別集計</h2>${sorted.map(([ch,d])=>`
+      <div class="rank-row">
+        <div class="rank-label"><div style="font-weight:600">${ch}</div><div style="font-size:11px;color:#888">${d.count}件 / 売上 ${fmt(d.sales)}</div></div>
+        <div class="rank-val">${fmt(d.profit)}</div>
+      </div>`).join('')}</div>`;
   }
   document.getElementById('u-content').innerHTML = tabBar + body;
   window._uraigeList = list;
 }
-
 window.switchUriageTab = function(tab) {
   urageTab = tab;
   if (window._uraigeList) renderUriage(window._uraigeList, tab);
 };
-
 // ========== ユーティリティ ==========
 function fmt(n) { return '¥' + Math.round(n).toLocaleString(); }
 function genId(model, now) {

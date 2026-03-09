@@ -507,7 +507,7 @@ function renderZaiko() {
       ${r.memo ? `<div style="font-size:12px;color:#888;margin-top:4px">📝 ${r.memo}</div>` : ''}
       ${r.mercariUrl ? `<div style="margin-top:6px"><a href="${r.mercariUrl}" target="_blank" style="font-size:12px;color:#1565C0;text-decoration:none;font-weight:600;">🔗 メルカリ商品ページ</a></div>` : ''}
       <div class="action-row">
-        <button class="action-btn btn-status"   onclick="openModal('${r.docId}','${r.status}',false)">📋 ステータス</button>
+        <button class="action-btn btn-status"   onclick="openModal('${r.docId}','${r.status}',false)">📋 ${r.status}</button>
         <button class="action-btn btn-sell"     onclick="openModal('${r.docId}','${r.status}',true)">💰 売却</button>
         <button class="action-btn btn-template" onclick="openTemplateModal('${r.docId}')">📝 テンプレ</button>
         <button class="action-btn btn-memo"     onclick="openMemoModal('${r.docId}')">✏️ メモ</button>

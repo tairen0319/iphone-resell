@@ -46,16 +46,18 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
 .judgment.yellow{background:#FFF9C4;color:#F57F17;}
 .judgment.red{background:#FFCDD2;color:#C62828;}
 .item-card{background:white;border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 2px 6px rgba(0,0,0,0.07);border-left:4px solid #e0e0e0;}
-.item-card.s-未出品{border-left-color:#9E9E9E;}
+.item-card.s-待ち{border-left-color:#9E9E9E;}
+.item-card.s-到着済み{border-left-color:#7B1FA2;}
+.item-card.s-検品済み{border-left-color:#00897B;}
 .item-card.s-出品中{border-left-color:#4A90D9;}
-.item-card.s-取引中{border-left-color:#FF8F00;}
 .item-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
 .item-model{font-size:15px;font-weight:700;}
 .item-id{font-size:10px;color:#aaa;margin-top:2px;}
 .badge{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;}
-.badge-未出品{background:#f0f0f0;color:#666;}
+.badge-待ち{background:#f0f0f0;color:#666;}
+.badge-到着済み{background:#F3E5F5;color:#7B1FA2;}
+.badge-検品済み{background:#E0F2F1;color:#00695C;}
 .badge-出品中{background:#E3F2FD;color:#1565C0;}
-.badge-取引中{background:#FFF3E0;color:#E65100;}
 .item-prices{display:flex;gap:12px;font-size:12px;color:#666;flex-wrap:wrap;margin-bottom:4px;}
 .item-profit{font-size:14px;font-weight:700;color:#2E7D32;}
 .item-profit.neg{color:#C62828;}
@@ -244,7 +246,7 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
   <div class="modal">
     <h3 id="modal-title">ステータス変更</h3>
     <label>ステータス</label>
-    <select id="modal-status"><option>未出品</option><option>出品中</option><option>取引中</option></select>
+    <select id="modal-status"><option>待ち</option><option>到着済み</option><option>検品済み</option><option>出品中</option></select>
     <div id="modal-sell-area" style="display:none;margin-top:12px">
       <label>売却価格（円）</label>
       <input type="number" id="modal-sell-price" placeholder="例: 18000" inputmode="numeric">
@@ -253,6 +255,19 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
         <option value="たいれん">たいれん</option>
         <option value="りょう">りょう</option>
       </select>
+      <div style="margin-top:14px;padding:10px;background:#f8f8f8;border-radius:10px;">
+        <div style="font-size:12px;font-weight:700;color:#444;margin-bottom:8px;">📝 経費を確認・変更</div>
+        <label>バッテリー代（円）</label>
+        <input type="number" id="modal-battery" placeholder="例: 1500" inputmode="numeric">
+        <label>フロントパネル代（円）</label>
+        <input type="number" id="modal-front-panel" placeholder="例: 3000" inputmode="numeric">
+        <label>パーツ送料（円）</label>
+        <input type="number" id="modal-parts-sending" placeholder="例: 770" inputmode="numeric">
+        <label>メルカリ手数料（円）</label>
+        <input type="number" id="modal-fee" placeholder="自動計算" inputmode="numeric">
+        <label>発送送料（円）</label>
+        <input type="number" id="modal-shipping" placeholder="例: 520" inputmode="numeric">
+      </div>
     </div>
     <div class="modal-btns">
       <button class="modal-cancel" onclick="closeModal()">キャンセル</button>
@@ -425,7 +440,7 @@ window.confirmPurchase = async function() {
     purchasePrice: lastCalc.price,
     partsCost: lastCalc.battery + lastCalc.screenCost,
     souba: lastCalc.souba, profit: lastCalc.profit,
-    status: '未出品', memo: memo || '', imei: '',
+    status: '待ち', memo: memo || '', imei: '',
     tairenPaid: lastCalc.price,
     ryoPaid: lastCalc.battery + lastCalc.screenCost,
     createdAt: now.getTime()
@@ -485,6 +500,7 @@ function renderZaiko() {
       </div>
       <div class="item-profit ${profit<0?'neg':''}">予想利益: ${fmt(profit)}</div>
       ${r.memo ? `<div style="font-size:12px;color:#888;margin-top:4px">📝 ${r.memo}</div>` : ''}
+      ${r.mercariUrl ? `<div style="margin-top:6px"><a href="${r.mercariUrl}" target="_blank" style="font-size:12px;color:#1565C0;text-decoration:none;font-weight:600;">🔗 メルカリ商品ページ</a></div>` : ''}
       <div class="action-row">
         <button class="action-btn btn-status"   onclick="openModal('${r.docId}','${r.status}',false)">📋 ステータス</button>
         <button class="action-btn btn-sell"     onclick="openModal('${r.docId}','${r.status}',true)">💰 売却</button>
@@ -601,6 +617,21 @@ window.openModal = function(docId, status, sellMode) {
   document.getElementById('modal-sell-area').style.display = sellMode ? 'block' : 'none';
   document.getElementById('modal-sell-price').value = '';
   document.getElementById('modal-account').value = 'たいれん';
+  if (sellMode) {
+    const item = zaikoList.find(r => r.docId === docId);
+    if (item) {
+      document.getElementById('modal-battery').value       = item.battery       || 0;
+      document.getElementById('modal-front-panel').value   = item.frontPanel    || 0;
+      document.getElementById('modal-parts-sending').value = item.partsSending  || 0;
+      document.getElementById('modal-fee').value           = item.fee           || '';
+      document.getElementById('modal-shipping').value      = item.shipping      || 520;
+    }
+    // 売却価格入力時に手数料を自動計算
+    document.getElementById('modal-sell-price').oninput = function() {
+      const sp = Number(this.value);
+      if (sp > 0) document.getElementById('modal-fee').value = Math.ceil(sp * 0.1);
+    };
+  }
   document.getElementById('statusModal').classList.add('show');
 };
 
@@ -613,22 +644,28 @@ window.applyStatus = async function() {
   if (!item) return;
   closeModal();
   if (isSellMode) {
-    const sellPrice = Number(document.getElementById('modal-sell-price').value);
-    const account   = document.getElementById('modal-account').value;
+    const sellPrice   = Number(document.getElementById('modal-sell-price').value);
+    const account     = document.getElementById('modal-account').value;
     if (!sellPrice || sellPrice <= 0) { showToast('⚠️ 売却価格を入力してください'); return; }
-    const fee      = Math.ceil(sellPrice * 0.1);
-    const shipping = 520;
-    const profit   = sellPrice - fee - shipping - item.purchasePrice - (item.partsCost || 0);
-    const now      = new Date();
+    const battery      = Number(document.getElementById('modal-battery').value)      || 0;
+    const frontPanel   = Number(document.getElementById('modal-front-panel').value)  || 0;
+    const partsSending = Number(document.getElementById('modal-parts-sending').value)|| 0;
+    const fee          = Number(document.getElementById('modal-fee').value)           || Math.ceil(sellPrice * 0.1);
+    const shipping     = Number(document.getElementById('modal-shipping').value)      || 520;
+    const partsCost    = battery + frontPanel;
+    const profit       = sellPrice - fee - shipping - item.purchasePrice - partsCost - partsSending;
+    const now          = new Date();
     await addDoc(collection(db, 'uriage'), {
       date: now.toISOString().slice(0,10),
       invId: item.invId, model: item.model, capacity: item.capacity,
-      purchasePrice: item.purchasePrice, partsCost: item.partsCost || 0,
+      purchasePrice: item.purchasePrice, partsCost,
+      battery, frontPanel, partsSending,
       tairenPaid: item.tairenPaid || item.purchasePrice || 0,
-      ryoPaid: item.ryoPaid || item.partsCost || 0,
+      ryoPaid: item.ryoPaid || partsCost || 0,
       account, sellPrice, fee, shipping,
-      totalCost: item.purchasePrice + (item.partsCost||0) + fee + shipping,
+      totalCost: item.purchasePrice + partsCost + partsSending + fee + shipping,
       profit, profitRate: sellPrice > 0 ? profit/sellPrice : 0,
+      mercariUrl: item.mercariUrl || '',
       createdAt: now.getTime()
     });
     await deleteDoc(doc(db, 'zaiko', currentDocId));

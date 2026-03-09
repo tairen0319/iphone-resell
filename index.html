@@ -71,6 +71,10 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
 .btn-template{background:#F3E5F5;color:#7B1FA2;}
 .btn-memo{background:#FFF8E1;color:#F57F17;}
 .btn-delete{background:#FFEBEE;color:#C62828;}
+.btn-status-待ち{background:#f0f0f0;color:#666;}
+.btn-status-到着済み{background:#F3E5F5;color:#7B1FA2;}
+.btn-status-検品済み{background:#E0F2F1;color:#00695C;}
+.btn-status-出品中{background:#E3F2FD;color:#1565C0;}
 .kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
 .kpi-card{background:white;border-radius:14px;padding:14px;box-shadow:0 2px 6px rgba(0,0,0,0.07);text-align:center;}
 .kpi-card.full{grid-column:1/-1;}
@@ -507,7 +511,7 @@ function renderZaiko() {
       ${r.memo ? `<div style="font-size:12px;color:#888;margin-top:4px">📝 ${r.memo}</div>` : ''}
       ${r.mercariUrl ? `<div style="margin-top:6px"><a href="${r.mercariUrl}" target="_blank" style="font-size:12px;color:#1565C0;text-decoration:none;font-weight:600;">🔗 メルカリ商品ページ</a></div>` : ''}
       <div class="action-row">
-        <button class="action-btn btn-status"   onclick="openModal('${r.docId}','${r.status}',false)">📋 ${r.status}</button>
+        <button class="action-btn btn-status-${r.status}"   onclick="openModal('${r.docId}','${r.status}',false)">📋 ${r.status}</button>
         <button class="action-btn btn-sell"     onclick="openModal('${r.docId}','${r.status}',true)">💰 売却</button>
         <button class="action-btn btn-template" onclick="openTemplateModal('${r.docId}')">📝 テンプレ</button>
         <button class="action-btn btn-memo"     onclick="openMemoModal('${r.docId}')">✏️ メモ</button>

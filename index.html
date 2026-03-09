@@ -619,7 +619,8 @@ function calcModalProfit() {
   const battery     = Number(document.getElementById('modal-battery').value)         || 0;
   const frontPanel  = Number(document.getElementById('modal-front-panel').value)     || 0;
   const partsSend   = Number(document.getElementById('modal-parts-sending').value)   || 0;
-  const fee         = Number(document.getElementById('modal-fee').value)             || (sellPrice > 0 ? Math.ceil(sellPrice * 0.1) : 0);
+  const feeEl = document.getElementById('modal-fee');
+  const fee   = feeEl.value !== '' ? Number(feeEl.value) : (sellPrice > 0 ? Math.ceil(sellPrice * 0.1) : 0);
   const shipping    = Number(document.getElementById('modal-shipping').value)        || 520;
   const purchase    = item.purchasePrice || 0;
   const profit      = sellPrice - fee - shipping - purchase - battery - frontPanel - partsSend;
@@ -654,7 +655,7 @@ window.openModal = function(docId, status, sellMode) {
       document.getElementById('modal-battery').value       = item.battery       || 0;
       document.getElementById('modal-front-panel').value   = item.frontPanel    || 0;
       document.getElementById('modal-parts-sending').value = item.partsSending  || 0;
-      document.getElementById('modal-fee').value           = item.fee           || '';
+      document.getElementById('modal-fee').value           = item.fee > 0 ? item.fee : '';
       document.getElementById('modal-shipping').value      = item.shipping      || 520;
     }
     // 売却価格入力時に手数料を自動計算 + 利益プレビュー更新
@@ -688,7 +689,8 @@ window.applyStatus = async function() {
     const battery      = Number(document.getElementById('modal-battery').value)      || 0;
     const frontPanel   = Number(document.getElementById('modal-front-panel').value)  || 0;
     const partsSending = Number(document.getElementById('modal-parts-sending').value)|| 0;
-    const fee          = Number(document.getElementById('modal-fee').value)           || Math.ceil(sellPrice * 0.1);
+    const feeInput     = document.getElementById('modal-fee');
+    const fee          = feeInput.value !== '' ? Number(feeInput.value) : Math.ceil(sellPrice * 0.1);
     const shipping     = Number(document.getElementById('modal-shipping').value)      || 520;
     const partsCost    = battery + frontPanel;
     const profit       = sellPrice - fee - shipping - item.purchasePrice - partsCost - partsSending;

@@ -75,6 +75,7 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
 .btn-status-到着済み{background:#F3E5F5;color:#7B1FA2;}
 .btn-status-検品済み{background:#E0F2F1;color:#00695C;}
 .btn-status-出品中{background:#E3F2FD;color:#1565C0;}
+.btn-status-未出品{background:#f0f0f0;color:#666;}
 .kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
 .kpi-card{background:white;border-radius:14px;padding:14px;box-shadow:0 2px 6px rgba(0,0,0,0.07);text-align:center;}
 .kpi-card.full{grid-column:1/-1;}
@@ -248,7 +249,7 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
   <div class="modal">
     <h3 id="modal-title">ステータス変更</h3>
     <label>ステータス</label>
-    <select id="modal-status"><option>待ち</option><option>到着済み</option><option>検品済み</option><option>出品中</option></select>
+    <select id="modal-status"><option>待ち</option><option>到着済み</option><option>検品済み</option><option>出品中</option><option>未出品</option></select>
     <div id="modal-sell-area" style="display:none;margin-top:12px">
       <label>売却価格（円）</label>
       <input type="number" id="modal-sell-price" placeholder="例: 18000" inputmode="numeric">
@@ -445,7 +446,10 @@ window.confirmPurchase = async function() {
   const memo = document.getElementById('s-memo').value;
   if (!confirm(`${lastCalc.model} ${lastCalc.cap}\n¥${lastCalc.price.toLocaleString()} で仕入れ確定しますか？`)) return;
   const now = new Date();
-  const id  = genId(lastCalc.model, now);
+  const today = now.toISOString().slice(0,10);
+  const snap = await getDocs(collection(db, 'zaiko'));
+  const todayCount = [...snap.docs].filter(d => d.data().date === today).length;
+  const id  = genId(lastCalc.model, now, todayCount + 1);
   await addDoc(collection(db, 'zaiko'), {
     invId: id, date: now.toISOString().slice(0,10),
     model: lastCalc.model, capacity: lastCalc.cap,
@@ -918,12 +922,12 @@ window.switchUriageTab = function(tab) {
 };
 // ========== ユーティリティ ==========
 function fmt(n) { return '¥' + Math.round(n).toLocaleString(); }
-function genId(model, now) {
+function genId(model, now, seq) {
   const num  = (model.match(/(\d+)/) || ['','00'])[1];
   const l    = model.toLowerCase();
   const code = l.includes('pro max') ? num+'pm' : l.includes('pro') ? num+'pro' : l.includes('plus') ? num+'+' : l.includes('mini') ? num+'m' : num;
   const date = (now.getMonth()+1).toString().padStart(2,'0') + now.getDate().toString().padStart(2,'0');
-  return code + '-' + date + Math.floor(Math.random()*90+10);
+  return code + '-' + date + '-' + String(seq).padStart(2,'0');
 }
 window.showToast = function(msg) {
   const t = document.getElementById('toast');

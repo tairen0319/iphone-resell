@@ -128,9 +128,13 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
 .modal-ok{background:#2E7D32;color:white;}
 .modal-ok-red{background:#C62828;color:white;}
 .modal-cancel{background:#f0f0f0;color:#666;}
-.template-output{width:100%;height:300px;padding:12px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:12px;background:#fafafa;font-family:inherit;resize:none;line-height:1.6;}
+.template-output{width:100%;height:260px;padding:12px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:12px;background:#fafafa;font-family:inherit;resize:none;line-height:1.6;}
+.title-output{width:100%;padding:12px;border:1.5px solid #4A90D9;border-radius:10px;font-size:13px;background:#EBF4FF;font-family:inherit;resize:none;line-height:1.6;font-weight:600;color:#1a1a2e;}
 .copy-btn{width:100%;padding:14px;background:#7B1FA2;color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;}
 .copy-btn.copied{background:#2E7D32;}
+.copy-title-btn{width:100%;padding:10px;background:#4A90D9;color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-top:6px;}
+.copy-title-btn.copied{background:#2E7D32;}
+.section-label{font-size:11px;font-weight:700;color:#7B1FA2;text-transform:uppercase;letter-spacing:0.5px;margin-top:14px;margin-bottom:4px;}
 .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#333;color:white;padding:12px 24px;border-radius:24px;font-size:14px;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;}
 .toast.show{opacity:1;}
 .loading{text-align:center;padding:40px;color:#888;font-size:15px;}
@@ -150,13 +154,13 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
 <div id="page-dashboard" class="page active">
   <div class="header"><h1>📱 iPhone転売管理</h1></div>
   <div class="nav-grid">
-    <button class="nav-card card-shiire" onclick="showPage('shiire')"><span class="icon">🔍</span><div class="label">仕入れ判断</div><div class="desc">利益を即計算</div></button>
-    <button class="nav-card card-zaiko"  onclick="showPage('zaiko')"><span class="icon">📦</span><div class="label">在庫一覧</div><div class="desc">ステータス管理</div></button>
-    <button class="nav-card card-uriage" onclick="showPage('uriage')"><span class="icon">💰</span><div class="label">売上サマリー</div><div class="desc">利益・件数を確認</div></button>
-    <button class="nav-card card-souba"  onclick="showPage('souba')"><span class="icon">📊</span><div class="label">相場管理</div><div class="desc">月1更新</div></button>
+    <button class="nav-card card-shiire" data-fn="showPage" data-args='["shiire"]'><span class="icon">🔍</span><div class="label">仕入れ判断</div><div class="desc">利益を即計算</div></button>
+    <button class="nav-card card-zaiko"  data-fn="showPage" data-args='["zaiko"]'><span class="icon">📦</span><div class="label">在庫一覧</div><div class="desc">ステータス管理</div></button>
+    <button class="nav-card card-uriage" data-fn="showPage" data-args='["uriage"]'><span class="icon">💰</span><div class="label">売上サマリー</div><div class="desc">利益・件数を確認</div></button>
+    <button class="nav-card card-souba"  data-fn="showPage" data-args='["souba"]'><span class="icon">📊</span><div class="label">相場管理</div><div class="desc">月1更新</div></button>
   </div>
   <div style="padding:0 20px 20px;max-width:480px;margin:0 auto;">
-    <button class="nav-card card-seisan" style="width:100%;display:flex;align-items:center;gap:16px;padding:18px 20px;text-align:left;" onclick="showPage('seisan')">
+    <button class="nav-card card-seisan" style="width:100%;display:flex;align-items:center;gap:16px;padding:18px 20px;text-align:left;" data-fn="showPage" data-args='["seisan"]'>
       <span style="font-size:36px;">🤝</span>
       <div><div class="label">精算管理</div><div class="desc">たいれん ↔ りょう の分配計算</div></div>
     </button>
@@ -165,7 +169,7 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
 </div>
 <!-- 仕入れ判断 -->
 <div id="page-shiire" class="page">
-  <div class="header"><button class="back-btn" onclick="showPage('dashboard')">←</button><h1>🔍 仕入れ判断</h1></div>
+  <div class="header"><button class="back-btn" data-fn="showPage" data-args='["dashboard"]'>←</button><h1>🔍 仕入れ判断</h1></div>
   <div class="container">
     <div class="card">
       <h2>商品情報を入力</h2>
@@ -178,7 +182,7 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
       <input type="number" id="s-price" placeholder="例: 12000" inputmode="numeric">
       <label>メモ（任意）</label>
       <input type="text" id="s-memo" placeholder="例: バッテリー膨張あり">
-      <button class="btn btn-blue" onclick="calcProfit()">🔍 利益を計算する</button>
+      <button class="btn btn-blue" data-fn="calcProfit">🔍 利益を計算する</button>
     </div>
     <div id="s-loading" class="loading" style="display:none">⏳ 計算中...</div>
     <div id="s-result" style="display:none">
@@ -192,14 +196,14 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
         <div class="result-row" style="font-weight:700"><span>総コスト</span><span class="val" id="r-cost"></span></div>
         <div class="judgment" id="r-judgment"></div>
       </div>
-      <button class="btn btn-green" onclick="confirmPurchase()">✅ 仕入れ確定！在庫に追加</button>
-      <button class="btn btn-gray" onclick="resetShiire()" style="margin-top:8px">❌ 見送り</button>
+      <button class="btn btn-green" data-fn="confirmPurchase">✅ 仕入れ確定！在庫に追加</button>
+      <button class="btn btn-gray" data-fn="resetShiire" style="margin-top:8px">❌ 見送り</button>
     </div>
   </div>
 </div>
 <!-- 在庫一覧 -->
 <div id="page-zaiko" class="page">
-  <div class="header"><button class="back-btn" onclick="showPage('dashboard')">←</button><h1>📦 在庫一覧</h1><button class="reload-btn" onclick="loadZaiko()">↻</button></div>
+  <div class="header"><button class="back-btn" data-fn="showPage" data-args='["dashboard"]'>←</button><h1>📦 在庫一覧</h1><button class="reload-btn" data-fn="loadZaiko">↻</button></div>
   <div class="container">
     <div class="summary-bar">
       <div class="sum-item"><div class="sum-num" id="z-count">-</div><div class="sum-lbl">在庫数</div></div>
@@ -211,12 +215,12 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
 </div>
 <!-- 売上サマリー -->
 <div id="page-uriage" class="page">
-  <div class="header"><button class="back-btn" onclick="showPage('dashboard')">←</button><h1>💰 売上サマリー</h1><button class="reload-btn" onclick="loadUriage()">↻</button></div>
+  <div class="header"><button class="back-btn" data-fn="showPage" data-args='["dashboard"]'>←</button><h1>💰 売上サマリー</h1><button class="reload-btn" data-fn="loadUriage">↻</button></div>
   <div class="container"><div id="u-content"><div class="loading">⏳ 読み込み中...</div></div></div>
 </div>
 <!-- 相場管理 -->
 <div id="page-souba" class="page">
-  <div class="header"><button class="back-btn" onclick="showPage('dashboard')">←</button><h1>📊 相場管理</h1></div>
+  <div class="header"><button class="back-btn" data-fn="showPage" data-args='["dashboard"]'>←</button><h1>📊 相場管理</h1></div>
   <div class="container">
     <div class="card">
       <h2>💡 相場を個別に更新</h2>
@@ -224,18 +228,18 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
       <label>容量</label><select id="so-cap"><option value="">選択</option></select>
       <label>新しい相場（円）</label>
       <input type="number" id="so-price" placeholder="例: 85000" inputmode="numeric">
-      <button class="btn btn-orange" onclick="updateSouba()">📊 相場を更新</button>
+      <button class="btn btn-orange" data-fn="updateSouba">📊 相場を更新</button>
     </div>
     <div class="card"><h2>📋 現在の相場一覧</h2><div id="so-list"><div class="loading">⏳ 読み込み中...</div></div></div>
   </div>
 </div>
 <!-- 精算管理 -->
 <div id="page-seisan" class="page">
-  <div class="header"><button class="back-btn" onclick="showPage('dashboard')">←</button><h1>🤝 精算管理</h1><button class="reload-btn" onclick="loadSeisan()">↻</button></div>
+  <div class="header"><button class="back-btn" data-fn="showPage" data-args='["dashboard"]'>←</button><h1>🤝 精算管理</h1><button class="reload-btn" data-fn="loadSeisan">↻</button></div>
   <div class="container">
     <div class="card">
       <h2>📅 期間を選択</h2>
-      <select id="seisan-period" onchange="loadSeisan()">
+      <select id="seisan-period" data-fn="loadSeisan">
         <option value="thismonth">今月</option>
         <option value="lastmonth">先月</option>
         <option value="all">全期間</option>
@@ -283,8 +287,8 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
       </div>
     </div>
     <div class="modal-btns">
-      <button class="modal-cancel" onclick="closeModal()">キャンセル</button>
-      <button class="modal-ok" onclick="applyStatus()">確定</button>
+      <button class="modal-cancel" data-fn="closeModal">キャンセル</button>
+      <button class="modal-ok" data-fn="applyStatus">確定</button>
     </div>
   </div>
 </div>
@@ -295,8 +299,8 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
     <p id="delete-msg" style="font-size:14px;color:#444;margin-bottom:8px;line-height:1.6;"></p>
     <p style="font-size:12px;color:#C62828;font-weight:600;">この操作は元に戻せません</p>
     <div class="modal-btns">
-      <button class="modal-cancel" onclick="closeDeleteModal()">キャンセル</button>
-      <button class="modal-ok-red" onclick="execDelete()">削除する</button>
+      <button class="modal-cancel" data-fn="closeDeleteModal">キャンセル</button>
+      <button class="modal-ok-red" data-fn="execDelete">削除する</button>
     </div>
   </div>
 </div>
@@ -307,33 +311,39 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
     <label>メモ</label>
     <textarea id="memo-input" placeholder="例: バッテリー膨張あり、画面キズ小" rows="4" style="resize:vertical;"></textarea>
     <div class="modal-btns">
-      <button class="modal-cancel" onclick="closeMemoModal()">キャンセル</button>
-      <button class="modal-ok" onclick="saveMemo()">保存</button>
+      <button class="modal-cancel" data-fn="closeMemoModal">キャンセル</button>
+      <button class="modal-ok" data-fn="saveMemo">保存</button>
     </div>
   </div>
 </div>
-<!-- 出品テンプレモーダル -->
+<!-- 出品テンプレモーダル（改善版） -->
 <div class="modal-overlay" id="templateModal">
   <div class="modal">
     <h3>📝 出品テンプレ生成</h3>
+    <label>カラー</label>
+    <input type="text" id="tmpl-color" placeholder="例：スターライト、ブラック、レッド">
     <label>IMEI</label>
     <input type="text" id="tmpl-imei" placeholder="例：354123456789012" inputmode="numeric">
     <label>画面の状態</label>
-    <input type="text" id="tmpl-screen" placeholder="例：傷や汚れなし">
-    <label>本体の傷</label>
-    <input type="text" id="tmpl-body" placeholder="例：右下角に若干の擦り傷あり">
-    <button class="btn btn-purple" onclick="generateTemplate()" style="margin-top:10px">📝 テンプレを生成</button>
-    <div id="tmpl-result" style="display:none;margin-top:12px">
+    <input type="text" id="tmpl-screen" placeholder="例：割れなし、傷なし">
+    <label>本体の傷（具体的に）</label>
+    <input type="text" id="tmpl-body" placeholder="例：背面に細かいすり傷あり（指で触れて分かる程度）">
+    <button class="btn btn-purple" data-fn="generateTemplate" style="margin-top:10px">📝 タイトル＆テンプレを生成</button>
+    <div id="tmpl-result" style="display:none;margin-top:14px">
+      <div class="section-label">🏷️ 商品タイトル（コピーして使用）</div>
+      <textarea class="title-output" id="tmpl-title-text" readonly rows="3"></textarea>
+      <button class="copy-title-btn" id="tmpl-title-copy-btn" data-fn="copyTitle">📋 タイトルをコピー</button>
+      <div class="section-label" style="margin-top:14px">📄 商品説明文</div>
       <textarea class="template-output" id="tmpl-text" readonly></textarea>
-      <button class="copy-btn" id="tmpl-copy-btn" onclick="copyTemplate()">📋 コピーする</button>
+      <button class="copy-btn" id="tmpl-copy-btn" data-fn="copyTemplate">📋 説明文をコピーする</button>
     </div>
-    <button class="modal-cancel" onclick="closeTemplateModal()" style="width:100%;padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px">閉じる</button>
+    <button class="modal-cancel" data-fn="closeTemplateModal" style="width:100%;padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px">閉じる</button>
   </div>
 </div>
 <div class="toast" id="toast"></div>
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-import { getFirestore, collection, getDocs, addDoc, doc, updateDoc, deleteDoc, setDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs, addDoc, doc, updateDoc, deleteDoc, setDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 const firebaseConfig = {
   apiKey: "AIzaSyBapimiG-dxZjyftV5kN9nIVFWVUFcjTHk",
   authDomain: "iphone-resell-dc263.firebaseapp.com",
@@ -345,7 +355,14 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 window._db = db;
-window._firebase = { collection, getDocs, addDoc, doc, updateDoc, deleteDoc, setDoc, query, orderBy };
+// onclick delegation fix for ESM scope
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-fn]');
+  if (!el) return;
+  const fn = el.dataset.fn;
+  const args = el.dataset.args ? JSON.parse(el.dataset.args) : [];
+  if (typeof window[fn] === 'function') window[fn](...args);
+});
 window.addEventListener('load', async () => {
   await initSouba();
   loadSoubaSelects();
@@ -353,11 +370,13 @@ window.addEventListener('load', async () => {
 async function initSouba() {
   const snap = await getDocs(collection(db, 'souba'));
   if (snap.size > 0) { loadSoubaList(); return; }
-  const res = await fetch('souba.json');
-  const data = await res.json();
-  for (const item of data) {
-    await setDoc(doc(db, 'souba', item.model + '_' + item.capacity), item);
-  }
+  try {
+    const res = await fetch('souba.json');
+    const data = await res.json();
+    for (const item of data) {
+      await setDoc(doc(db, 'souba', item.model + '_' + item.capacity), item);
+    }
+  } catch(e) { console.log('souba.json not found, skipping initial load'); }
   loadSoubaList();
 }
 window.showPage = function(name) {
@@ -515,11 +534,11 @@ function renderZaiko() {
       ${r.memo ? `<div style="font-size:12px;color:#888;margin-top:4px">📝 ${r.memo}</div>` : ''}
       ${r.mercariUrl ? `<div style="margin-top:6px"><a href="${r.mercariUrl}" target="_blank" style="font-size:12px;color:#1565C0;text-decoration:none;font-weight:600;">🔗 メルカリ商品ページ</a></div>` : ''}
       <div class="action-row">
-        <button class="action-btn btn-status-${r.status}"   onclick="openModal('${r.docId}','${r.status}',false)">📋 ${r.status}</button>
-        <button class="action-btn btn-sell"     onclick="openModal('${r.docId}','${r.status}',true)">💰 売却</button>
-        <button class="action-btn btn-template" onclick="openTemplateModal('${r.docId}')">📝 テンプレ</button>
-        <button class="action-btn btn-memo"     onclick="openMemoModal('${r.docId}')">✏️ メモ</button>
-        <button class="action-btn btn-delete"   onclick="openDeleteModal('zaiko','${r.docId}','${r.model} ${r.capacity}')">🗑️</button>
+        <button class="action-btn btn-status-${r.status}"   data-fn="openModal" data-args='["${r.docId}", "${r.status}", false]'>📋 ${r.status}</button>
+        <button class="action-btn btn-sell"     data-fn="openModal" data-args='["${r.docId}", "${r.status}", true]'>💰 売却</button>
+        <button class="action-btn btn-template" data-fn="openTemplateModal" data-args='["${r.docId}"]'>📝 テンプレ</button>
+        <button class="action-btn btn-memo"     data-fn="openMemoModal" data-args='["${r.docId}"]'>✏️ メモ</button>
+        <button class="action-btn btn-delete"   data-fn="openDeleteModal" data-args='["zaiko", "${r.docId}", "${r.model} ${r.capacity}"]'>🗑️</button>
       </div>
     </div>`;
   }).join('');
@@ -563,16 +582,19 @@ window.execDelete = async function() {
   if (deleteTarget.collection === 'zaiko')  loadZaiko();
   if (deleteTarget.collection === 'uriage') loadUriage();
 };
-// ========== 出品テンプレ ==========
+// ========== 出品テンプレ（改善版） ==========
 window.openTemplateModal = function(docId) {
   templateItem = zaikoList.find(r => r.docId === docId);
   if (!templateItem) return;
   document.getElementById('tmpl-imei').value   = templateItem.imei || '';
+  document.getElementById('tmpl-color').value  = templateItem.color || '';
   document.getElementById('tmpl-screen').value = '';
   document.getElementById('tmpl-body').value   = '';
   document.getElementById('tmpl-result').style.display = 'none';
-  document.getElementById('tmpl-copy-btn').textContent = '📋 コピーする';
+  document.getElementById('tmpl-copy-btn').textContent = '📋 説明文をコピーする';
   document.getElementById('tmpl-copy-btn').classList.remove('copied');
+  document.getElementById('tmpl-title-copy-btn').textContent = '📋 タイトルをコピー';
+  document.getElementById('tmpl-title-copy-btn').classList.remove('copied');
   document.getElementById('templateModal').classList.add('show');
 };
 window.closeTemplateModal = function() {
@@ -581,53 +603,94 @@ window.closeTemplateModal = function() {
 window.generateTemplate = function() {
   if (!templateItem) return;
   const imei        = document.getElementById('tmpl-imei').value   || '【IMEIを入力】';
-  const screenState = document.getElementById('tmpl-screen').value || '【画面の状態を入力（例：傷や汚れなし）】';
-  const bodyState   = document.getElementById('tmpl-body').value   || '【本体の傷を入力（例：右下角に若干の擦り傷あり）】';
+  const color       = document.getElementById('tmpl-color').value  || '';
+  const screenState = document.getElementById('tmpl-screen').value || '割れなし';
+  const bodyState   = document.getElementById('tmpl-body').value   || '【本体の傷を具体的に入力】';
+  const model    = templateItem.model;
+  const capacity = templateItem.capacity;
+
+  // ========== タイトル生成 ==========
+  const colorPart = color ? ` / ${color}` : '';
+  const title = `🔋バッテリー新品交換100%【${model} / ${capacity}${colorPart} / SIMフリー】動作確認済`;
+
+  // ========== 説明文生成（改善版） ==========
+  const colorLine = color ? `・カラー　：${color}\n` : '';
+  const tags = buildTags(model, capacity, color);
+
   const text =
-`■ フォロー割実施中！
-『購入前』にフォローして、『フォロー割希望』とコメントして下さい！
-300円のお値引きをさせていただきます。
-■ 他にもiPhone端末本体出品中！
-#即購入OKですのiphone
+`🔋 バッテリー新品交換済・最大容量100%
+中古iPhone最大の不安を解消！交換済みのため、新品同様にお使いいただけます。
+
+■ フォロー割実施中！
+購入前にフォロー＋「フォロー割希望」とコメントで300円引きいたします！
+他にもiPhone端末出品中 → #即購入OKですのiphone
+
 ■ 機種概要
-機種名：${templateItem.model}
-容量：${templateItem.capacity}
-SIMフリー（ロック解除済）
-ネットワーク利用制限：〇
-アクティベーションロック：解除済
-初期化：全て初期化済
-IMEI：${imei}
+・機種名　：${model}
+${colorLine}・容量　　：${capacity}
+・SIM　　：SIMフリー（ロック解除済）
+・ネットワーク利用制限：〇（問題なし）
+・アクティベーションロック：解除済
+・初期化　：全て初期化済
+・IMEI　：${imei}
+
 ■ 商品状態
-画面：${screenState}
-本体の傷：${bodyState}
-Face ID：使用可能
-バッテリー：新品に交換 最大容量100%
-動作確認：起動・充電・カメラ・各種ボタン類・電波
-　　　　　液晶及びタッチパネル等すべての動作を確認済みです
-■ 梱包/発送
-緩衝材に包み、丁寧に梱包して発送します。
-ご購入頂いた後24時間以内に発送いたします。
-■ ご購入前の注意点
-・中古品のため微細な傷や使用感があります
-・新品同様をお求めの方や神経質な方はご遠慮ください
-・他フリマサイトでも同時に出品しているため、タイミングによっては売り切れの場合がございます。
-■ 初期保証について
-・商品到着から7日以内に不具合があった場合は、受取評価前にご連絡ください
-・保証対象は「動作確認項目」に関する明確な不具合のみです
-・保証対応は、修理・交換・返品いずれかを相談のうえ対応いたします
-・外観や使用感、色味などの感覚的な違いによる返品は対象外です。`;
+・画面　：${screenState}
+・本体　：${bodyState}
+・Face ID　：使用可能
+・バッテリー：新品交換済・最大容量100%
+・動作確認　：起動・充電・カメラ・各種ボタン・電波・液晶・タッチパネル　全て確認済み
+
+■ 梱包・発送
+・緩衝材で丁寧に梱包してお届けします
+・ご購入後24時間以内に発送いたします
+
+■ ご購入前のご注意
+・中古品のため微細な傷・使用感があります
+・新品同様をお求めの方はご遠慮ください
+・他フリマサイトと同時出品中のため、売り切れの場合はご了承ください
+
+■ 初期保証（到着から7日間）
+・動作確認項目に関する明確な不具合のみ対象
+・修理・交換・返品のいずれかで対応いたします
+・外観や色味など感覚的な違いによる返品は対象外です
+
+${tags}`;
+
+  document.getElementById('tmpl-title-text').value = title;
   document.getElementById('tmpl-text').value = text;
   document.getElementById('tmpl-result').style.display = 'block';
 };
+
+function buildTags(model, capacity, color) {
+  const num = (model.match(/(\d+)/) || ['',''])[1];
+  const tags = ['#iPhone' + num];
+  if (color) tags.push('#iPhone' + num + color.replace(/\s/g,''));
+  tags.push('#iPhone' + num + capacity.replace('GB','GB').replace('TB','TB'));
+  tags.push('#SIMフリー', '#バッテリー100', '#バッテリー新品', '#即発送', '#卒業', '#入学', '#新生活', '#スマートフォン', '#即購入OK');
+  return tags.join(' ');
+}
+
 window.copyTemplate = function() {
   const text = document.getElementById('tmpl-text').value;
   navigator.clipboard.writeText(text).then(() => {
     const btn = document.getElementById('tmpl-copy-btn');
     btn.textContent = '✅ コピーしました！';
     btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = '📋 コピーする'; btn.classList.remove('copied'); }, 2500);
+    setTimeout(() => { btn.textContent = '📋 説明文をコピーする'; btn.classList.remove('copied'); }, 2500);
   });
 };
+
+window.copyTitle = function() {
+  const text = document.getElementById('tmpl-title-text').value;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('tmpl-title-copy-btn');
+    btn.textContent = '✅ コピーしました！';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '📋 タイトルをコピー'; btn.classList.remove('copied'); }, 2500);
+  });
+};
+
 // ========== ステータス・売却モーダル ==========
 let isSellMode = false;
 function calcModalProfit() {
@@ -823,12 +886,12 @@ function renderUriage(list, tab) {
   const totalProfit = list.reduce((s,r) => s + r.profit, 0);
   const avgRate     = list.reduce((s,r) => s + r.profitRate, 0) / list.length;
   const tabBar = `<div class="tab-bar">
-    <button class="tab-btn ${tab==='summary'?'active':''}" onclick="switchUriageTab('summary')">📊 サマリー</button>
-    <button class="tab-btn ${tab==='monthly'?'active':''}" onclick="switchUriageTab('monthly')">📅 月別</button>
-    <button class="tab-btn ${tab==='weekly'?'active':''}"  onclick="switchUriageTab('weekly')">📅 週別</button>
-    <button class="tab-btn ${tab==='model'?'active':''}"   onclick="switchUriageTab('model')">📱 機種別</button>
-    <button class="tab-btn ${tab==='profit'?'active':''}"  onclick="switchUriageTab('profit')">💰 利益額</button>
-    <button class="tab-btn ${tab==='channel'?'active':''}" onclick="switchUriageTab('channel')">🏪 販売先</button>
+    <button class="tab-btn ${tab==='summary'?'active':''}" data-fn="switchUriageTab" data-args='["summary"]'>📊 サマリー</button>
+    <button class="tab-btn ${tab==='monthly'?'active':''}" data-fn="switchUriageTab" data-args='["monthly"]'>📅 月別</button>
+    <button class="tab-btn ${tab==='weekly'?'active':''}"  data-fn="switchUriageTab" data-args='["weekly"]'>📅 週別</button>
+    <button class="tab-btn ${tab==='model'?'active':''}"   data-fn="switchUriageTab" data-args='["model"]'>📱 機種別</button>
+    <button class="tab-btn ${tab==='profit'?'active':''}"  data-fn="switchUriageTab" data-args='["profit"]'>💰 利益額</button>
+    <button class="tab-btn ${tab==='channel'?'active':''}" data-fn="switchUriageTab" data-args='["channel"]'>🏪 販売先</button>
   </div>`;
   let body = '';
   if (tab === 'summary') {
@@ -852,7 +915,7 @@ function renderUriage(list, tab) {
           </div>
         </div>
         <div class="action-row">
-          <button class="action-btn btn-delete" onclick="openDeleteModal('uriage','${r.docId}','${r.model} ${r.capacity} (${r.date})')">🗑️ 削除</button>
+          <button class="action-btn btn-delete" data-fn="openDeleteModal" data-args='["uriage", "${r.docId}", "${r.model} ${r.capacity} (${r.date})"]'>🗑️ 削除</button>
         </div>
       </div>`).join('')}`;
   } else if (tab === 'monthly') {

@@ -472,10 +472,8 @@ window.confirmPurchase = async function() {
   const memo = document.getElementById('s-memo').value;
   if (!confirm(`${lastCalc.model} ${lastCalc.cap}\n¥${lastCalc.price.toLocaleString()} で仕入れ確定しますか？`)) return;
   const now = new Date();
-  const today = now.toISOString().slice(0,10);
   const snap = await getDocs(collection(db, 'zaiko'));
-  const todayCount = [...snap.docs].filter(d => d.data().date === today).length;
-  const id  = genId(lastCalc.model, now, todayCount + 1);
+  const id  = String(snap.size + 1).padStart(2, '0');
   await addDoc(collection(db, 'zaiko'), {
     invId: id, date: now.toISOString().slice(0,10),
     model: lastCalc.model, capacity: lastCalc.cap,

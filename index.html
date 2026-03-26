@@ -328,9 +328,13 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
     <label>IMEI</label>
     <input type="text" id="tmpl-imei" placeholder="例：354123456789012" inputmode="numeric">
     <label>画面の状態</label>
-    <input type="text" id="tmpl-screen" placeholder="例：割れなし、傷なし">
-    <label>本体の傷（具体的に）</label>
-    <input type="text" id="tmpl-body" placeholder="例：背面に細かいすり傷あり（指で触れて分かる程度）">
+    <input type="text" id="tmpl-screen" placeholder="例：新品交換済み / 割れなし・傷なし">
+    <label>背面の状態</label>
+    <input type="text" id="tmpl-back" placeholder="例：細かいすり傷あり">
+    <label>側面の状態</label>
+    <input type="text" id="tmpl-side" placeholder="例：傷なし">
+    <label>カメラ周りの状態</label>
+    <input type="text" id="tmpl-camera" placeholder="例：傷なし">
     <button class="btn btn-purple" data-fn="generateTemplate" style="margin-top:10px">📝 タイトル＆テンプレを生成</button>
     <div id="tmpl-result" style="display:none;margin-top:14px">
       <div class="section-label">🏷️ 商品タイトル（コピーして使用）</div>
@@ -591,8 +595,10 @@ window.openTemplateModal = function(docId) {
   if (!templateItem) return;
   document.getElementById('tmpl-imei').value   = templateItem.imei || '';
   document.getElementById('tmpl-color').value  = templateItem.color || '';
-  document.getElementById('tmpl-screen').value = '';
-  document.getElementById('tmpl-body').value   = '';
+  document.getElementById('tmpl-screen').value = templateItem.frontPanel > 0 ? '新品交換済み' : '';
+  document.getElementById('tmpl-back').value   = '';
+  document.getElementById('tmpl-side').value   = '';
+  document.getElementById('tmpl-camera').value = '';
   document.getElementById('tmpl-result').style.display = 'none';
   document.getElementById('tmpl-copy-btn').textContent = '📋 説明文をコピーする';
   document.getElementById('tmpl-copy-btn').classList.remove('copied');
@@ -607,22 +613,31 @@ window.generateTemplate = function() {
   if (!templateItem) return;
   const imei        = document.getElementById('tmpl-imei').value   || '【IMEIを入力】';
   const color       = document.getElementById('tmpl-color').value  || '';
-  const screenState = document.getElementById('tmpl-screen').value || '割れなし';
-  const bodyState   = document.getElementById('tmpl-body').value   || '【本体の傷を具体的に入力】';
+  const screenState = document.getElementById('tmpl-screen').value || '【画面の状態を入力】';
+  const backState   = document.getElementById('tmpl-back').value   || '【背面の状態を入力】';
+  const sideState   = document.getElementById('tmpl-side').value   || '【側面の状態を入力】';
+  const cameraState = document.getElementById('tmpl-camera').value || '【カメラ周りの状態を入力】';
   const model    = templateItem.model;
   const capacity = templateItem.capacity;
 
-  // ========== タイトル生成 ==========
-  const colorPart = color ? ` / ${color}` : '';
-  const title = `🔋バッテリー新品交換100%【${model} / ${capacity}${colorPart} / SIMフリー】動作確認済`;
+  // 管理番号から連番部分を取得（例: 13pm-0310-01 → 01）
+  const invId = templateItem.invId || '';
+  const seq = invId.split('-').pop() || '';
 
-  // ========== 説明文生成（改善版） ==========
+  // ========== タイトル生成 ==========
+  const title = `${model} ${capacity} 新品バッテリー100%${color ? ' ' + color : ''}`;
+
+  // ========== 説明文生成 ==========
   const colorLine = color ? `・カラー　：${color}\n` : '';
-  const tags = buildTags(model, capacity, color);
+  const tags = buildTags(model, capacity);
 
   const text =
-`🔋 バッテリー新品交換済・最大容量100%
+`バッテリー新品交換済・最大容量100%
 中古iPhone最大の不安を解消！交換済みのため、新品同様にお使いいただけます。
+
+無料特典ガラスコーティング付き！
+画面にコーティング施工済みのため、キズや指紋が付きにくく、滑らかな操作が可能です。
+フィルム不要でそのままご使用いただけます！
 
 ■ フォロー割実施中！
 購入前にフォロー＋「フォロー割希望」とコメントで300円引きいたします！
@@ -638,11 +653,14 @@ ${colorLine}・容量　　：${capacity}
 ・IMEI　：${imei}
 
 ■ 商品状態
-・画面　：${screenState}
-・本体　：${bodyState}
-・Face ID　：使用可能
-・バッテリー：新品交換済・最大容量100%
-・動作確認　：起動・充電・カメラ・各種ボタン・電波・液晶・タッチパネル　全て確認済み
+・画面　　　：${screenState}
+・背面　　　：${backState}
+・側面　　　：${sideState}
+・カメラ周り：${cameraState}
+・バッテリー：新品交換済・最大容量100%！！
+
+◽️動作確認
+起動・充電・カメラ・各種ボタン・電波・液晶・タッチパネル・Face ID全て確認済み
 
 ■ 梱包・発送
 ・緩衝材で丁寧に梱包してお届けします
@@ -658,20 +676,16 @@ ${colorLine}・容量　　：${capacity}
 ・修理・交換・返品のいずれかで対応いたします
 ・外観や色味など感覚的な違いによる返品は対象外です
 
-${tags}`;
+${tags}${seq ? '\n' + seq : ''}`;
 
   document.getElementById('tmpl-title-text').value = title;
   document.getElementById('tmpl-text').value = text;
   document.getElementById('tmpl-result').style.display = 'block';
 };
 
-function buildTags(model, capacity, color) {
+function buildTags(model, capacity) {
   const num = (model.match(/(\d+)/) || ['',''])[1];
-  const tags = ['#iPhone' + num];
-  if (color) tags.push('#iPhone' + num + color.replace(/\s/g,''));
-  tags.push('#iPhone' + num + capacity.replace('GB','GB').replace('TB','TB'));
-  tags.push('#SIMフリー', '#バッテリー100', '#バッテリー新品', '#即発送', '#卒業', '#入学', '#新生活', '#スマートフォン', '#即購入OK');
-  return tags.join(' ');
+  return `#iPhone #iPhone${num} #SIMフリー #バッテリー新品 #即発送 #卒業 #入学 #新生活 #スマートフォン #即購入OK`;
 }
 
 window.copyTemplate = function() {

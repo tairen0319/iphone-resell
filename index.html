@@ -162,12 +162,6 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
     <button class="nav-card card-uriage" data-fn="showPage" data-args='["uriage"]'><span class="icon">💰</span><div class="label">売上サマリー</div><div class="desc">利益・件数を確認</div></button>
     <button class="nav-card card-souba"  data-fn="showPage" data-args='["souba"]'><span class="icon">📊</span><div class="label">相場管理</div><div class="desc">月1更新</div></button>
   </div>
-  <div style="padding:0 20px 20px;max-width:480px;margin:0 auto;">
-    <button class="nav-card card-seisan" style="width:100%;display:flex;align-items:center;gap:16px;padding:18px 20px;text-align:left;" data-fn="showPage" data-args='["seisan"]'>
-      <span style="font-size:36px;">🤝</span>
-      <div><div class="label">精算管理</div><div class="desc">たいれん ↔ りょう の分配計算</div></div>
-    </button>
-  </div>
   <div class="footer">Firebase同期 | iPhone転売管理</div>
 </div>
 <!-- 仕入れ判断 -->
@@ -234,21 +228,6 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
       <button class="btn btn-orange" data-fn="updateSouba">📊 相場を更新</button>
     </div>
     <div class="card"><h2>📋 現在の相場一覧</h2><div id="so-list"><div class="loading">⏳ 読み込み中...</div></div></div>
-  </div>
-</div>
-<!-- 精算管理 -->
-<div id="page-seisan" class="page">
-  <div class="header"><button class="back-btn" data-fn="showPage" data-args='["dashboard"]'>←</button><h1>🤝 精算管理</h1><button class="reload-btn" data-fn="loadSeisan">↻</button></div>
-  <div class="container">
-    <div class="card">
-      <h2>📅 期間を選択</h2>
-      <select id="seisan-period" data-fn="loadSeisan">
-        <option value="thismonth">今月</option>
-        <option value="lastmonth">先月</option>
-        <option value="all">全期間</option>
-      </select>
-    </div>
-    <div id="seisan-content"><div class="loading">⏳ 読み込み中...</div></div>
   </div>
 </div>
 <!-- ステータス変更モーダル -->
@@ -396,7 +375,6 @@ window.showPage = function(name) {
   if (name === 'zaiko')  loadZaiko();
   if (name === 'uriage') loadUriage();
   if (name === 'souba')  loadSoubaList();
-  if (name === 'seisan') loadSeisan();
 };
 let soubaData = [];
 async function loadSoubaList() {
@@ -827,58 +805,6 @@ window.applyStatus = async function() {
     showToast('✅ ステータスを「' + newStatus + '」に変更');
   }
   loadZaiko();
-};
-// ========== 精算管理 ==========
-window.loadSeisan = async function() {
-  const period = document.getElementById('seisan-period')?.value || 'thismonth';
-  document.getElementById('seisan-content').innerHTML = '<div class="loading">⏳ 計算中...</div>';
-  const snap = await getDocs(query(collection(db, 'uriage'), orderBy('createdAt', 'desc')));
-  let list = [];
-  snap.forEach(d => list.push(d.data()));
-  const now = new Date();
-  const thisMonth = now.toISOString().slice(0,7);
-  const lastMonthDate = new Date(now.getFullYear(), now.getMonth()-1, 1);
-  const lastMonth = lastMonthDate.toISOString().slice(0,7);
-  if (period === 'thismonth') list = list.filter(r => r.date && r.date.startsWith(thisMonth));
-  else if (period === 'lastmonth') list = list.filter(r => r.date && r.date.startsWith(lastMonth));
-  if (!list.length) {
-    document.getElementById('seisan-content').innerHTML = '<div class="empty">💰 対象期間の売上データがありません</div>';
-    return;
-  }
-  const totalProfit     = list.reduce((s,r) => s + r.profit, 0);
-  const eachShare       = totalProfit / 2;
-  const tairenPaidTotal = list.reduce((s,r) => s + (r.tairenPaid || r.purchasePrice || 0), 0);
-  const ryoPaidTotal    = list.reduce((s,r) => s + (r.ryoPaid || r.partsCost || 0), 0);
-  const tairenReceives  = eachShare + (tairenPaidTotal / 2) - (ryoPaidTotal / 2);
-  const ryoReceives     = eachShare + (ryoPaidTotal / 2) - (tairenPaidTotal / 2);
-  const diff            = tairenReceives - ryoReceives;
-  const payAmount       = Math.abs(Math.round(diff / 2));
-  const payDirection    = diff > 0 ? 'りょう → たいれん' : diff < 0 ? 'たいれん → りょう' : '精算なし（イーブン）';
-  const periodLabel     = period === 'thismonth' ? thisMonth : period === 'lastmonth' ? lastMonth : '全期間';
-  document.getElementById('seisan-content').innerHTML = `
-    <div class="seisan-result ${diff === 0 ? 'even' : 'pay'}">
-      <div class="seisan-who">${periodLabel} の精算結果</div>
-      <div class="seisan-amount">${diff === 0 ? 'イーブン！' : fmt(payAmount)}</div>
-      <div class="seisan-label">${payDirection}</div>
-    </div>
-    <div class="card">
-      <h2>📊 内訳</h2>
-      <div class="seisan-detail-row"><span>📦 売上件数</span><span class="s-val">${list.length}件</span></div>
-      <div class="seisan-detail-row"><span>💰 純利益合計</span><span class="s-val">${fmt(totalProfit)}</span></div>
-      <div class="seisan-detail-row"><span>各自の取り分（50%）</span><span class="s-val">${fmt(eachShare)}</span></div>
-    </div>
-    <div class="card">
-      <h2>💳 立替内訳</h2>
-      <div class="seisan-detail-row"><span>たいれん立替（仕入れ代）</span><span class="s-val tairen">${fmt(tairenPaidTotal)}</span></div>
-      <div class="seisan-detail-row"><span>　うち回収すべき額</span><span class="s-val tairen">+${fmt(tairenPaidTotal/2)}</span></div>
-      <div class="seisan-detail-row"><span>りょう立替（パーツ代）</span><span class="s-val ryo">${fmt(ryoPaidTotal)}</span></div>
-      <div class="seisan-detail-row"><span>　うち回収すべき額</span><span class="s-val ryo">+${fmt(ryoPaidTotal/2)}</span></div>
-    </div>
-    <div class="card">
-      <h2>👤 各自の最終受取額</h2>
-      <div class="seisan-detail-row"><span>たいれん</span><span class="s-val tairen">${fmt(tairenReceives)}</span></div>
-      <div class="seisan-detail-row"><span>りょう</span><span class="s-val ryo">${fmt(ryoReceives)}</span></div>
-    </div>`;
 };
 // ========== 売上サマリー ==========
 let urageTab = 'summary';

@@ -629,8 +629,10 @@ window.generateTemplate = function() {
 `バッテリー新品交換済・最大容量100%
 中古iPhone最大の不安を解消！交換済みのため、新品同様にお使いいただけます。
 
+！！無料特典！！
 スマホコーティングキット付き！
-スマホ用コーティング剤をセットでお届けいたします。キズ・指紋が付きにくくフィルム不要のサラサラ操作感が続きます。
+スマホ用コーティング剤をセットでお届けいたします。
+キズ・指紋が付きにくくフィルム不要のサラサラ操作感が続きます。
 
 ■ フォロー割実施中！
 購入前にフォロー＋「フォロー割希望」とコメントで300円引きいたします！
@@ -677,7 +679,7 @@ ${seq}`;
 };
 function buildTags(model) {
   const num = (model.match(/(\d+)/) || ['',''])[1];
-  return `#iPhone #iPhone${num} #SIMフリー #バッテリー新品 #即発送 #卒業 #入学 #新生活 #スマートフォン #即購入OK`;
+  return `#iPhone #iPhone${num} #SIMフリー #バッテリー新品 #即発送 #スマートフォン #即購入OK`;
 }
 window.copyTemplate = function() {
   const text = document.getElementById('tmpl-text').value;

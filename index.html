@@ -319,7 +319,7 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
     </div>
   </div>
 </div>
-<!-- 出品テンプレモーダル（改善版） -->
+<!-- 出品テンプレモーダル -->
 <div class="modal-overlay" id="templateModal">
   <div class="modal">
     <h3>📝 出品テンプレ生成</h3>
@@ -362,7 +362,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 window._db = db;
-// onclick delegation fix for ESM scope
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-fn]');
   if (!el) return;
@@ -587,7 +586,7 @@ window.execDelete = async function() {
   if (deleteTarget.collection === 'zaiko')  loadZaiko();
   if (deleteTarget.collection === 'uriage') loadUriage();
 };
-// ========== 出品テンプレ（改善版） ==========
+// ========== 出品テンプレ ==========
 window.openTemplateModal = function(docId) {
   templateItem = zaikoList.find(r => r.docId === docId);
   if (!templateItem) return;
@@ -617,26 +616,16 @@ window.generateTemplate = function() {
   const cameraState = document.getElementById('tmpl-camera').value || '【カメラ周りの状態を入力】';
   const model    = templateItem.model;
   const capacity = templateItem.capacity;
-
-  // 管理番号から連番部分を取得（例: 13pm-0310-01 → 01）
-  const invId = templateItem.invId || '';
-  const seq = invId.split('-').pop() || '';
-
-  // ========== タイトル生成 ==========
+  const seq      = templateItem.invId || '';
   const title = `${model} ${capacity} 新品バッテリー100%${color ? ' ' + color : ''}`;
-
-  // ========== 説明文生成 ==========
   const colorLine = color ? `・カラー　：${color}\n` : '';
-  const tags = buildTags(model, capacity);
-
+  const tags = buildTags(model);
   const text =
 `バッテリー新品交換済・最大容量100%
 中古iPhone最大の不安を解消！交換済みのため、新品同様にお使いいただけます。
 
-無料特典ガラスコーティング付き！
-画面にコーティング施工済みのため、キズや指紋が付きにくく、滑らかな操作が可能です。
-フィルム不要でそのままご使用いただけます！
-ご希望の方は「ガラスコーティング希望」とメッセージください。
+スマホコーティングキット付き！
+スマホ用コーティング剤をセットでお届けいたします。キズ・指紋が付きにくくフィルム不要のサラサラ操作感が続きます。
 
 ■ フォロー割実施中！
 購入前にフォロー＋「フォロー割希望」とコメントで300円引きいたします！
@@ -675,18 +664,16 @@ ${colorLine}・容量　　：${capacity}
 ・修理・交換・返品のいずれかで対応いたします
 ・外観や色味など感覚的な違いによる返品は対象外です
 
-${tags}${seq ? '\n' + seq : ''}`;
-
+${tags}
+${seq}`;
   document.getElementById('tmpl-title-text').value = title;
   document.getElementById('tmpl-text').value = text;
   document.getElementById('tmpl-result').style.display = 'block';
 };
-
-function buildTags(model, capacity) {
+function buildTags(model) {
   const num = (model.match(/(\d+)/) || ['',''])[1];
   return `#iPhone #iPhone${num} #SIMフリー #バッテリー新品 #即発送 #卒業 #入学 #新生活 #スマートフォン #即購入OK`;
 }
-
 window.copyTemplate = function() {
   const text = document.getElementById('tmpl-text').value;
   navigator.clipboard.writeText(text).then(() => {
@@ -696,7 +683,6 @@ window.copyTemplate = function() {
     setTimeout(() => { btn.textContent = '📋 説明文をコピーする'; btn.classList.remove('copied'); }, 2500);
   });
 };
-
 window.copyTitle = function() {
   const text = document.getElementById('tmpl-title-text').value;
   navigator.clipboard.writeText(text).then(() => {
@@ -706,7 +692,6 @@ window.copyTitle = function() {
     setTimeout(() => { btn.textContent = '📋 タイトルをコピー'; btn.classList.remove('copied'); }, 2500);
   });
 };
-
 // ========== ステータス・売却モーダル ==========
 let isSellMode = false;
 function calcModalProfit() {
@@ -1001,13 +986,6 @@ window.switchUriageTab = function(tab) {
 };
 // ========== ユーティリティ ==========
 function fmt(n) { return '¥' + Math.round(n).toLocaleString(); }
-function genId(model, now, seq) {
-  const num  = (model.match(/(\d+)/) || ['','00'])[1];
-  const l    = model.toLowerCase();
-  const code = l.includes('pro max') ? num+'pm' : l.includes('pro') ? num+'pro' : l.includes('plus') ? num+'+' : l.includes('mini') ? num+'m' : num;
-  const date = (now.getMonth()+1).toString().padStart(2,'0') + now.getDate().toString().padStart(2,'0');
-  return code + '-' + date + '-' + String(seq).padStart(2,'0');
-}
 window.showToast = function(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');

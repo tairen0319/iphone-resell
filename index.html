@@ -747,7 +747,6 @@ window.openModal = function(docId, status, sellMode) {
   document.getElementById('modal-account').value = 'たいれん';
   document.getElementById('modal-channel').value = 'メルカリ';
   if (sellMode) {
-    const item = zaikoList.find(r => r.docId === docId);
     if (item) {
       document.getElementById('modal-battery').value       = item.battery      || 0;
       document.getElementById('modal-front-panel').value   = item.frontPanel   || 0;

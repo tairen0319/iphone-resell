@@ -256,7 +256,11 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
   <div class="modal">
     <h3 id="modal-title">ステータス変更</h3>
     <label>ステータス</label>
-    <select id="modal-status"><option>待ち</option><option>到着済み</option><option>検品済み</option><option>出品中</option><option>発送中</option><option>未出品</option></select>
+    <select id="modal-status" onchange="toggleListingUrlArea()"><option>待ち</option><option>到着済み</option><option>検品済み</option><option>出品中</option><option>発送中</option><option>未出品</option></select>
+    <div id="modal-listing-url-area" style="display:none;margin-top:12px">
+      <label>出品URL（メルカリ）</label>
+      <input type="url" id="modal-listing-url" placeholder="https://jp.mercari.com/item/..." style="font-size:13px;">
+    </div>
     <div id="modal-sell-area" style="display:none;margin-top:12px">
       <label>売却価格（円）</label>
       <input type="number" id="modal-sell-price" placeholder="例: 18000" inputmode="numeric">
@@ -536,7 +540,8 @@ function renderZaiko() {
       </div>
       <div class="item-profit ${profit<0?'neg':''}">予想利益: ${fmt(profit)}</div>
       ${r.memo ? `<div style="font-size:12px;color:#888;margin-top:4px">📝 ${r.memo}</div>` : ''}
-      ${r.mercariUrl ? `<div style="margin-top:6px"><a href="${r.mercariUrl}" target="_blank" style="font-size:12px;color:#1565C0;text-decoration:none;font-weight:600;">🔗 メルカリ商品ページ</a></div>` : ''}
+      ${r.mercariUrl ? `<div style="margin-top:6px"><a href="${r.mercariUrl}" target="_blank" style="font-size:12px;color:#888;text-decoration:none;font-weight:600;">🛒 商品仕入れページ</a></div>` : ''}
+      ${r.listingUrl ? `<div style="margin-top:4px"><a href="${r.listingUrl}" target="_blank" style="font-size:12px;color:#1565C0;text-decoration:none;font-weight:600;">🔗 商品出品URL</a></div>` : ''}
       <div class="action-row">
         <button class="action-btn btn-status-${r.status}"   data-fn="openModal" data-args='["${r.docId}", "${r.status}", false]'>📋 ${r.status}</button>
         <button class="action-btn btn-sell"     data-fn="openModal" data-args='["${r.docId}", "${r.status}", true]'>💰 売却</button>
@@ -722,6 +727,10 @@ function calcModalProfit() {
   document.querySelector('#modal-profit-preview div').textContent = formula;
   val.textContent = (isPos ? '+' : '') + profit.toLocaleString() + '円';
 }
+window.toggleListingUrlArea = function() {
+  const status = document.getElementById('modal-status').value;
+  document.getElementById('modal-listing-url-area').style.display = status === '出品中' ? 'block' : 'none';
+};
 window.openModal = function(docId, status, sellMode) {
   currentDocId = docId;
   isSellMode = sellMode;
@@ -729,6 +738,9 @@ window.openModal = function(docId, status, sellMode) {
   document.getElementById('modal-status').value = status;
   document.getElementById('modal-status').style.display = sellMode ? 'none' : 'block';
   document.getElementById('modal-sell-area').style.display = sellMode ? 'block' : 'none';
+  const item = zaikoList.find(r => r.docId === docId);
+  document.getElementById('modal-listing-url').value = (!sellMode && item?.listingUrl) ? item.listingUrl : '';
+  document.getElementById('modal-listing-url-area').style.display = (!sellMode && status === '出品中') ? 'block' : 'none';
   document.getElementById('modal-sell-price').value = '';
   document.getElementById('modal-account').value = 'たいれん';
   document.getElementById('modal-channel').value = 'メルカリ';
@@ -805,7 +817,12 @@ window.applyStatus = async function() {
     showToast('✅ 売却完了！利益 ' + fmt(profit));
   } else {
     const newStatus = document.getElementById('modal-status').value;
-    await updateDoc(doc(db, 'zaiko', currentDocId), {status: newStatus});
+    const updateData = {status: newStatus};
+    if (newStatus === '出品中') {
+      const listingUrl = document.getElementById('modal-listing-url').value.trim();
+      if (listingUrl) updateData.listingUrl = listingUrl;
+    }
+    await updateDoc(doc(db, 'zaiko', currentDocId), updateData);
     showToast('✅ ステータスを「' + newStatus + '」に変更');
   }
   loadZaiko();

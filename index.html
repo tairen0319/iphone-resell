@@ -728,9 +728,9 @@ window.openModal = function(docId, status, sellMode) {
     if (item) {
       document.getElementById('modal-battery').value       = item.battery      || 0;
       document.getElementById('modal-front-panel').value   = item.frontPanel   || 0;
-      document.getElementById('modal-parts-sending').value = item.partsSending || 500;
+      document.getElementById('modal-parts-sending').value = 500;
       document.getElementById('modal-fee').value           = item.fee > 0 ? item.fee : '';
-      document.getElementById('modal-shipping').value      = item.shipping > 0 ? item.shipping : 210;
+      document.getElementById('modal-shipping').value      = 210;
     }
     document.getElementById('modal-sell-price').oninput = function() {
       const sp = Number(this.value);

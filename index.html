@@ -447,9 +447,9 @@ window.calcProfit = function() {
   if (!found) { showToast('❌ 相場データがありません'); return; }
   const souba        = found.souba;
   const battery      = found.battery || 0;
-  const shipping     = found.shipping || 520;
+  const shipping     = found.shipping || 210;
   const screenCost   = screen === 'あり' ? (found.frontPanel || 0) : 0;
-  const partsSending = found.partsSending || 0;
+  const partsSending = found.partsSending || 500;
   const accessories  = found.accessories || 0;
   const fee          = Math.ceil(souba * 0.1);
   const totalCost    = price + battery + screenCost + partsSending + accessories + fee + shipping;
@@ -711,7 +711,7 @@ function calcModalProfit() {
   const feeEl      = document.getElementById('modal-fee');
   const fee        = feeEl.value !== '' ? Number(feeEl.value) : (sellPrice > 0 ? Math.ceil(sellPrice * 0.1) : 0);
   const shippingEl = document.getElementById('modal-shipping');
-  const shipping   = shippingEl.value !== '' ? Number(shippingEl.value) : 520;
+  const shipping   = shippingEl.value !== '' ? Number(shippingEl.value) : 210;
   const purchase   = item.purchasePrice || 0;
   const profit     = sellPrice - fee - shipping - purchase - battery - frontPanel - partsSend;
   const preview    = document.getElementById('modal-profit-preview');
@@ -750,9 +750,9 @@ window.openModal = function(docId, status, sellMode) {
     if (item) {
       document.getElementById('modal-battery').value       = item.battery      || 0;
       document.getElementById('modal-front-panel').value   = item.frontPanel   || 0;
-      document.getElementById('modal-parts-sending').value = item.partsSending || 0;
+      document.getElementById('modal-parts-sending').value = item.partsSending || 500;
       document.getElementById('modal-fee').value           = item.fee > 0 ? item.fee : '';
-      document.getElementById('modal-shipping').value      = item.shipping > 0 ? item.shipping : 520;
+      document.getElementById('modal-shipping').value      = item.shipping > 0 ? item.shipping : 210;
     }
     document.getElementById('modal-sell-price').oninput = function() {
       const sp = Number(this.value);
@@ -797,7 +797,7 @@ window.applyStatus = async function() {
     const feeInput     = document.getElementById('modal-fee');
     const fee          = feeInput.value !== '' ? Number(feeInput.value) : Math.ceil(sellPrice * 0.1);
     const shippingInput = document.getElementById('modal-shipping');
-    const shipping      = shippingInput.value !== '' ? Number(shippingInput.value) : 520;
+    const shipping      = shippingInput.value !== '' ? Number(shippingInput.value) : 210;
     const partsCost    = battery + frontPanel;
     const profit       = sellPrice - fee - shipping - item.purchasePrice - partsCost - partsSending;
     const now          = new Date();

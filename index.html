@@ -23,6 +23,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 .card-uriage{border-top:4px solid #2E7D32;}
 .card-souba{border-top:4px solid #7B1FA2;}
 .card-seisan{border-top:4px solid #E91E63;}
+.card-kouho{border-top:4px solid #00BCD4;}
+.rank-badge{display:inline-block;font-size:13px;font-weight:800;padding:4px 10px;border-radius:8px;margin-right:8px;}
+.rank-badge.rank-S{background:#FFF3CD;color:#B8860B;}
+.rank-badge.rank-A{background:#E3F2FD;color:#1565C0;}
+.rank-badge.rank-B{background:#E8F5E9;color:#2E7D32;}
+.kouho-card{background:white;border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 2px 6px rgba(0,0,0,0.07);border-left:4px solid #e0e0e0;}
+.kouho-card.rank-S{border-left-color:#F9A825;}
+.kouho-card.rank-A{border-left-color:#1565C0;}
+.kouho-card.rank-B{border-left-color:#2E7D32;}
+.kouho-title{font-size:13px;color:#444;margin:6px 0;line-height:1.5;}
+.kouho-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;}
+.kouho-profit{font-size:18px;font-weight:800;color:#2E7D32;}
+.kouho-link{display:block;text-align:center;padding:10px;background:#00BCD4;color:white;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;margin-top:8px;}
+.kouho-updated{text-align:center;color:#aaa;font-size:11px;margin-bottom:12px;}
+.kouho-screen-note{font-size:11px;color:#E65100;margin-top:4px;}
 .container{padding:16px;max-width:480px;margin:0 auto;}
 .card{background:white;border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,0.07);}
 .card h2{font-size:14px;color:#666;margin-bottom:12px;font-weight:600;}
@@ -161,6 +176,7 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
     <button class="nav-card card-zaiko"  data-fn="showPage" data-args='["zaiko"]'><span class="icon">📦</span><div class="label">在庫一覧</div><div class="desc">ステータス管理</div></button>
     <button class="nav-card card-uriage" data-fn="showPage" data-args='["uriage"]'><span class="icon">💰</span><div class="label">売上サマリー</div><div class="desc">利益・件数を確認</div></button>
     <button class="nav-card card-souba"  data-fn="showPage" data-args='["souba"]'><span class="icon">📊</span><div class="label">相場管理</div><div class="desc">月1更新</div></button>
+    <button class="nav-card card-kouho"  data-fn="showPage" data-args='["kouho"]'><span class="icon">🔎</span><div class="label">仕入れ候補</div><div class="desc">1日1回自動更新</div></button>
   </div>
   <div class="footer">Firebase同期 | iPhone転売管理</div>
 </div>
@@ -228,6 +244,14 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
       <button class="btn btn-orange" data-fn="updateSouba">📊 相場を更新</button>
     </div>
     <div class="card"><h2>📋 現在の相場一覧</h2><div id="so-list"><div class="loading">⏳ 読み込み中...</div></div></div>
+  </div>
+</div>
+<!-- 仕入れ候補 -->
+<div id="page-kouho" class="page">
+  <div class="header"><button class="back-btn" data-fn="showPage" data-args='["dashboard"]'>←</button><h1>🔎 仕入れ候補</h1><button class="reload-btn" data-fn="loadKouho">↻</button></div>
+  <div class="container">
+    <div id="kouho-updated" class="kouho-updated"></div>
+    <div id="kouho-list"><div class="loading">⏳ 読み込み中...</div></div>
   </div>
 </div>
 <!-- ステータス変更モーダル -->
@@ -333,7 +357,7 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
 <div class="toast" id="toast"></div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, getDocs, addDoc, doc, updateDoc, deleteDoc, setDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, addDoc, doc, getDoc, updateDoc, deleteDoc, setDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 const firebaseConfig = {
   apiKey: "AIzaSyBapimiG-dxZjyftV5kN9nIVFWVUFcjTHk",
   authDomain: "iphone-resell-dc263.firebaseapp.com",
@@ -375,6 +399,7 @@ window.showPage = function(name) {
   if (name === 'zaiko')  loadZaiko();
   if (name === 'uriage') loadUriage();
   if (name === 'souba')  loadSoubaList();
+  if (name === 'kouho')  loadKouho();
 };
 let soubaData = [];
 async function loadSoubaList() {
@@ -404,6 +429,36 @@ function loadSoubaSelects() {
     };
   }
 }
+window.loadKouho = async function() {
+  const listEl = document.getElementById('kouho-list');
+  const updEl  = document.getElementById('kouho-updated');
+  listEl.innerHTML = '<div class="loading">⏳ 読み込み中...</div>';
+  updEl.textContent = '';
+  const snap = await getDoc(doc(db, 'candidates', 'latest'));
+  if (!snap.exists()) {
+    listEl.innerHTML = '<div class="empty">🔎 まだ候補がありません(次の自動実行をお待ちください)</div>';
+    return;
+  }
+  const data = snap.data();
+  const items = data.items || [];
+  if (data.updatedAt) {
+    const d = new Date(data.updatedAt);
+    updEl.textContent = `最終更新: ${d.toLocaleString('ja-JP')}`;
+  }
+  if (!items.length) {
+    listEl.innerHTML = '<div class="empty">🔎 今日は条件を満たす候補が見つかりませんでした</div>';
+    return;
+  }
+  listEl.innerHTML = items.map(it => `
+    <div class="kouho-card rank-${it.rank}">
+      <div><span class="rank-badge rank-${it.rank}">${it.rank}</span><span style="font-weight:700">${it.model} ${it.capacity}</span></div>
+      <div class="kouho-title">${it.title || ''}</div>
+      <div class="kouho-row"><span>出品価格</span><span>¥${Number(it.price).toLocaleString()}</span></div>
+      <div class="kouho-row"><span>見込み利益</span><span class="kouho-profit">¥${Number(it.profit).toLocaleString()}</span></div>
+      ${it.screenCracked ? '<div class="kouho-screen-note">⚠️ 画面割れ前提で計算(パネル代込み)</div>' : '<div class="kouho-screen-note">画面状態は出品ページで要確認</div>'}
+      <a class="kouho-link" href="${it.url}" target="_blank">🛒 メルカリで見る</a>
+    </div>`).join('');
+};
 window.updateSouba = async function() {
   const model = document.getElementById('so-model').value;
   const cap   = document.getElementById('so-cap').value;

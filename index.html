@@ -18,12 +18,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 .nav-card .icon{font-size:40px;margin-bottom:10px;display:block;}
 .nav-card .label{font-size:14px;font-weight:600;color:#333;}
 .nav-card .desc{font-size:11px;color:#888;margin-top:4px;}
-.card-shiire{border-top:4px solid #4A90D9;}
 .card-zaiko{border-top:4px solid #FF8F00;}
 .card-uriage{border-top:4px solid #2E7D32;}
-.card-souba{border-top:4px solid #7B1FA2;}
-.card-seisan{border-top:4px solid #E91E63;}
-.card-kouho{border-top:4px solid #00BCD4;}
 .rank-badge{display:inline-block;font-size:13px;font-weight:800;padding:4px 10px;border-radius:8px;margin-right:8px;}
 .rank-badge.rank-S{background:#FFF3CD;color:#B8860B;}
 .rank-badge.rank-A{background:#E3F2FD;color:#1565C0;}
@@ -170,49 +166,17 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
 <body>
 <!-- ダッシュボード -->
 <div id="page-dashboard" class="page active">
-  <div class="header"><h1>📱 iPhone転売管理</h1></div>
+  <div class="header"><h1>📱 iPhone転売管理</h1><button class="reload-btn" data-fn="loadKouho">↻</button></div>
   <div class="nav-grid">
-    <button class="nav-card card-shiire" data-fn="showPage" data-args='["shiire"]'><span class="icon">🔍</span><div class="label">仕入れ判断</div><div class="desc">利益を即計算</div></button>
     <button class="nav-card card-zaiko"  data-fn="showPage" data-args='["zaiko"]'><span class="icon">📦</span><div class="label">在庫一覧</div><div class="desc">ステータス管理</div></button>
     <button class="nav-card card-uriage" data-fn="showPage" data-args='["uriage"]'><span class="icon">💰</span><div class="label">売上サマリー</div><div class="desc">利益・件数を確認</div></button>
-    <button class="nav-card card-souba"  data-fn="showPage" data-args='["souba"]'><span class="icon">📊</span><div class="label">相場管理</div><div class="desc">月1更新</div></button>
-    <button class="nav-card card-kouho"  data-fn="showPage" data-args='["kouho"]'><span class="icon">🔎</span><div class="label">仕入れ候補</div><div class="desc">1日1回自動更新</div></button>
+  </div>
+  <div class="container" style="padding-top:4px">
+    <h2 style="font-size:14px;color:#666;margin:8px 4px 12px;font-weight:600">🔎 今日の仕入れおすすめ</h2>
+    <div id="kouho-updated" class="kouho-updated"></div>
+    <div id="kouho-list"><div class="loading">⏳ 読み込み中...</div></div>
   </div>
   <div class="footer">Firebase同期 | iPhone転売管理</div>
-</div>
-<!-- 仕入れ判断 -->
-<div id="page-shiire" class="page">
-  <div class="header"><button class="back-btn" data-fn="showPage" data-args='["dashboard"]'>←</button><h1>🔍 仕入れ判断</h1></div>
-  <div class="container">
-    <div class="card">
-      <h2>商品情報を入力</h2>
-      <label>機種</label><select id="s-model"><option value="">読み込み中...</option></select>
-      <label>容量</label>
-      <select id="s-capacity"><option value="">選択</option><option>64GB</option><option>128GB</option><option>256GB</option><option>512GB</option><option>1TB</option></select>
-      <label>画面交換</label>
-      <select id="s-screen"><option value="">選択</option><option>あり</option><option>なし</option></select>
-      <label>仕入れ値（円）</label>
-      <input type="number" id="s-price" placeholder="例: 12000" inputmode="numeric">
-      <label>メモ（任意）</label>
-      <input type="text" id="s-memo" placeholder="例: バッテリー膨張あり">
-      <button class="btn btn-blue" data-fn="calcProfit">🔍 利益を計算する</button>
-    </div>
-    <div id="s-loading" class="loading" style="display:none">⏳ 計算中...</div>
-    <div id="s-result" style="display:none">
-      <div class="card">
-        <h2>📊 計算結果</h2>
-        <div class="result-row"><span>相場（売値目安）</span><span class="val" id="r-souba"></span></div>
-        <div class="result-row"><span>メルカリ手数料(10%)</span><span class="val" id="r-fee"></span></div>
-        <div class="result-row"><span>送料</span><span class="val" id="r-ship"></span></div>
-        <div class="result-row"><span>バッテリー代</span><span class="val" id="r-bat"></span></div>
-        <div class="result-row"><span>仕入れ値</span><span class="val" id="r-pur"></span></div>
-        <div class="result-row" style="font-weight:700"><span>総コスト</span><span class="val" id="r-cost"></span></div>
-        <div class="judgment" id="r-judgment"></div>
-      </div>
-      <button class="btn btn-green" data-fn="confirmPurchase">✅ 仕入れ確定！在庫に追加</button>
-      <button class="btn btn-gray" data-fn="resetShiire" style="margin-top:8px">❌ 見送り</button>
-    </div>
-  </div>
 </div>
 <!-- 在庫一覧 -->
 <div id="page-zaiko" class="page">
@@ -230,29 +194,6 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
 <div id="page-uriage" class="page">
   <div class="header"><button class="back-btn" data-fn="showPage" data-args='["dashboard"]'>←</button><h1>💰 売上サマリー</h1><button class="reload-btn" data-fn="loadUriage">↻</button></div>
   <div class="container"><div id="u-content"><div class="loading">⏳ 読み込み中...</div></div></div>
-</div>
-<!-- 相場管理 -->
-<div id="page-souba" class="page">
-  <div class="header"><button class="back-btn" data-fn="showPage" data-args='["dashboard"]'>←</button><h1>📊 相場管理</h1></div>
-  <div class="container">
-    <div class="card">
-      <h2>💡 相場を個別に更新</h2>
-      <label>機種</label><select id="so-model"><option value="">選択</option></select>
-      <label>容量</label><select id="so-cap"><option value="">選択</option></select>
-      <label>新しい相場（円）</label>
-      <input type="number" id="so-price" placeholder="例: 85000" inputmode="numeric">
-      <button class="btn btn-orange" data-fn="updateSouba">📊 相場を更新</button>
-    </div>
-    <div class="card"><h2>📋 現在の相場一覧</h2><div id="so-list"><div class="loading">⏳ 読み込み中...</div></div></div>
-  </div>
-</div>
-<!-- 仕入れ候補 -->
-<div id="page-kouho" class="page">
-  <div class="header"><button class="back-btn" data-fn="showPage" data-args='["dashboard"]'>←</button><h1>🔎 仕入れ候補</h1><button class="reload-btn" data-fn="loadKouho">↻</button></div>
-  <div class="container">
-    <div id="kouho-updated" class="kouho-updated"></div>
-    <div id="kouho-list"><div class="loading">⏳ 読み込み中...</div></div>
-  </div>
 </div>
 <!-- ステータス変更モーダル -->
 <div class="modal-overlay" id="statusModal">
@@ -378,57 +319,34 @@ document.addEventListener('click', e => {
 });
 window.addEventListener('load', async () => {
   await initSouba();
-  loadSoubaSelects();
+  loadKouho();
 });
 async function initSouba() {
   const snap = await getDocs(collection(db, 'souba'));
-  if (snap.size > 0) { loadSoubaList(); return; }
+  soubaData = [];
+  snap.forEach(d => soubaData.push({id: d.id, ...d.data()}));
+  if (soubaData.length > 0) return;
   try {
     const res = await fetch('souba.json');
     const data = await res.json();
     for (const item of data) {
       await setDoc(doc(db, 'souba', item.model + '_' + item.capacity), item);
     }
+    soubaData = data;
   } catch(e) { console.log('souba.json not found, skipping initial load'); }
-  loadSoubaList();
 }
 window.showPage = function(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
   window.scrollTo(0, 0);
-  if (name === 'zaiko')  loadZaiko();
-  if (name === 'uriage') loadUriage();
-  if (name === 'souba')  loadSoubaList();
-  if (name === 'kouho')  loadKouho();
+  if (name === 'zaiko')     loadZaiko();
+  if (name === 'uriage')    loadUriage();
+  if (name === 'dashboard') loadKouho();
 };
+// souba(相場)データはiphone-souba-updateスキルが更新する。ここでは仕入れ確定時の
+// バッテリー代・パネル代の参照用にだけ読み込む(相場管理UIは廃止済み)。
 let soubaData = [];
-async function loadSoubaList() {
-  const snap = await getDocs(collection(db, 'souba'));
-  soubaData = [];
-  snap.forEach(d => soubaData.push({id: d.id, ...d.data()}));
-  soubaData.sort((a,b) => b.souba - a.souba);
-  const el = document.getElementById('so-list');
-  if (!el) return;
-  el.innerHTML = soubaData.map(s => `
-    <div class="souba-row">
-      <div><div style="font-weight:600">${s.model}</div><div style="color:#888;font-size:11px">${s.capacity}</div></div>
-      <div class="souba-price">¥${s.souba.toLocaleString()}</div>
-    </div>`).join('');
-  loadSoubaSelects();
-}
-function loadSoubaSelects() {
-  const models = [...new Set(soubaData.map(s => s.model))];
-  const sel = document.getElementById('s-model');
-  if (sel) sel.innerHTML = '<option value="">選択</option>' + models.map(m => `<option>${m}</option>`).join('');
-  const soSel = document.getElementById('so-model');
-  if (soSel) {
-    soSel.innerHTML = '<option value="">選択</option>' + models.map(m => `<option>${m}</option>`).join('');
-    soSel.onchange = function() {
-      const caps = soubaData.filter(s => s.model === this.value).map(s => s.capacity);
-      document.getElementById('so-cap').innerHTML = '<option value="">選択</option>' + caps.map(c => `<option>${c}</option>`).join('');
-    };
-  }
-}
+let kouhoItems = [];
 window.loadKouho = async function() {
   const listEl = document.getElementById('kouho-list');
   const updEl  = document.getElementById('kouho-updated');
@@ -440,16 +358,16 @@ window.loadKouho = async function() {
     return;
   }
   const data = snap.data();
-  const items = data.items || [];
+  kouhoItems = data.items || [];
   if (data.updatedAt) {
     const d = new Date(data.updatedAt);
     updEl.textContent = `最終更新: ${d.toLocaleString('ja-JP')}`;
   }
-  if (!items.length) {
+  if (!kouhoItems.length) {
     listEl.innerHTML = '<div class="empty">🔎 今日は条件を満たす候補が見つかりませんでした</div>';
     return;
   }
-  listEl.innerHTML = items.map(it => {
+  listEl.innerHTML = kouhoItems.map((it, i) => {
     const src = it.source === 'yahoo' ? 'Yahoo!フリマ' : 'メルカリ';
     return `
     <div class="kouho-card rank-${it.rank}">
@@ -459,79 +377,35 @@ window.loadKouho = async function() {
       <div class="kouho-row"><span>見込み利益</span><span class="kouho-profit">¥${Number(it.profit).toLocaleString()}</span></div>
       ${it.screenCracked ? '<div class="kouho-screen-note">⚠️ 画面割れ前提で計算(パネル代込み)</div>' : '<div class="kouho-screen-note">画面状態は出品ページで要確認</div>'}
       <a class="kouho-link" href="${it.url}" target="_blank">🛒 ${src}で見る</a>
+      <button class="btn btn-green" style="margin-top:8px" data-fn="confirmKouho" data-args='[${i}]'>✅ この候補を仕入れ確定</button>
     </div>`;
   }).join('');
 };
-window.updateSouba = async function() {
-  const model = document.getElementById('so-model').value;
-  const cap   = document.getElementById('so-cap').value;
-  const price = Number(document.getElementById('so-price').value);
-  if (!model || !cap || !price) { showToast('⚠️ 全項目入力してください'); return; }
-  await setDoc(doc(db, 'souba', model + '_' + cap), {model, capacity: cap, souba: price, battery: 3500, shipping: 520}, {merge: true});
-  showToast('✅ 相場を更新しました');
-  document.getElementById('so-price').value = '';
-  loadSoubaList();
-};
-let lastCalc = null;
-window.calcProfit = function() {
-  const model  = document.getElementById('s-model').value;
-  const cap    = document.getElementById('s-capacity').value;
-  const screen = document.getElementById('s-screen').value;
-  const price  = Number(document.getElementById('s-price').value);
-  if (!model || !cap || !screen || !price) { showToast('⚠️ 全項目入力してください'); return; }
-  const found = soubaData.find(s => s.model === model && s.capacity === cap);
-  if (!found) { showToast('❌ 相場データがありません'); return; }
-  const souba        = found.souba;
-  const battery      = found.battery || 0;
-  const shipping     = found.shipping || 210;
-  const screenCost   = screen === 'あり' ? (found.frontPanel || 0) : 0;
-  const partsSending = found.partsSending || 500;
-  const accessories  = found.accessories || 0;
-  const fee          = Math.ceil(souba * 0.1);
-  const totalCost    = price + battery + screenCost + partsSending + accessories + fee + shipping;
-  const profit       = souba - totalCost;
-  const rate         = souba > 0 ? Math.round(profit / souba * 1000) / 10 : 0;
-  lastCalc = {model, cap, screen, price, souba, battery, shipping, screenCost, fee, totalCost, profit, rate};
-  document.getElementById('r-souba').textContent = fmt(souba);
-  document.getElementById('r-fee').textContent   = fmt(fee);
-  document.getElementById('r-ship').textContent  = fmt(shipping);
-  document.getElementById('r-bat').textContent   = fmt(battery + screenCost + partsSending + accessories);
-  document.getElementById('r-pur').textContent   = fmt(price);
-  document.getElementById('r-cost').textContent  = fmt(totalCost);
-  const j = document.getElementById('r-judgment');
-  j.className = 'judgment ' + (profit >= 3000 ? 'green' : profit >= 1000 ? 'yellow' : 'red');
-  j.textContent = profit >= 3000 ? `🟢 仕入れ推奨！利益 ${fmt(profit)}（${rate}%）`
-                : profit >= 1000 ? `🟡 微妙... 利益 ${fmt(profit)}（${rate}%）`
-                : `🔴 見送り推奨！利益 ${fmt(profit)}（${rate}%）`;
-  document.getElementById('s-loading').style.display = 'none';
-  document.getElementById('s-result').style.display = 'block';
-};
-window.confirmPurchase = async function() {
-  if (!lastCalc) return;
-  const memo = document.getElementById('s-memo').value;
-  if (!confirm(`${lastCalc.model} ${lastCalc.cap}\n¥${lastCalc.price.toLocaleString()} で仕入れ確定しますか？`)) return;
+window.confirmKouho = async function(i) {
+  const it = kouhoItems[i];
+  if (!it) return;
+  if (!confirm(`${it.model} ${it.capacity}\n¥${it.price.toLocaleString()} で仕入れ確定しますか？`)) return;
+  const found      = soubaData.find(s => s.model === it.model && s.capacity === it.capacity);
+  const battery    = found?.battery || 0;
+  const screenCost = it.screenCracked ? (found?.frontPanel || 0) : 0;
+  const souba      = found?.souba || (it.price + it.profit);
   const now = new Date();
   const snap = await getDocs(collection(db, 'zaiko'));
   const id  = String(snap.size + 1).padStart(2, '0');
   await addDoc(collection(db, 'zaiko'), {
     invId: id, date: now.toISOString().slice(0,10),
-    model: lastCalc.model, capacity: lastCalc.cap,
-    purchasePrice: lastCalc.price,
-    partsCost: lastCalc.battery + lastCalc.screenCost,
-    souba: lastCalc.souba, profit: lastCalc.profit,
-    status: '待ち', memo: memo || '', imei: '',
-    tairenPaid: lastCalc.price,
-    ryoPaid: lastCalc.battery + lastCalc.screenCost,
+    model: it.model, capacity: it.capacity,
+    purchasePrice: it.price,
+    partsCost: battery + screenCost,
+    battery, frontPanel: screenCost,
+    souba, profit: it.profit,
+    status: '待ち', memo: it.title || '', imei: '',
+    mercariUrl: it.url,
+    tairenPaid: it.price,
+    ryoPaid: battery + screenCost,
     createdAt: now.getTime()
   });
   showToast('✅ 在庫に追加！ ID: ' + id);
-  resetShiire();
-};
-window.resetShiire = function() {
-  ['s-model','s-capacity','s-screen','s-memo'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('s-price').value = '';
-  document.getElementById('s-result').style.display = 'none';
-  lastCalc = null;
 };
 // ========== 在庫一覧 ==========
 let zaikoList = [];

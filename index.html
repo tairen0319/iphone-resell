@@ -449,15 +449,18 @@ window.loadKouho = async function() {
     listEl.innerHTML = '<div class="empty">🔎 今日は条件を満たす候補が見つかりませんでした</div>';
     return;
   }
-  listEl.innerHTML = items.map(it => `
+  listEl.innerHTML = items.map(it => {
+    const src = it.source === 'yahoo' ? 'Yahoo!フリマ' : 'メルカリ';
+    return `
     <div class="kouho-card rank-${it.rank}">
-      <div><span class="rank-badge rank-${it.rank}">${it.rank}</span><span style="font-weight:700">${it.model} ${it.capacity}</span></div>
+      <div><span class="rank-badge rank-${it.rank}">${it.rank}</span><span style="font-weight:700">${it.model} ${it.capacity}</span><span class="channel-chip channel-other" style="margin-left:8px">${src}</span></div>
       <div class="kouho-title">${it.title || ''}</div>
       <div class="kouho-row"><span>出品価格</span><span>¥${Number(it.price).toLocaleString()}</span></div>
       <div class="kouho-row"><span>見込み利益</span><span class="kouho-profit">¥${Number(it.profit).toLocaleString()}</span></div>
       ${it.screenCracked ? '<div class="kouho-screen-note">⚠️ 画面割れ前提で計算(パネル代込み)</div>' : '<div class="kouho-screen-note">画面状態は出品ページで要確認</div>'}
-      <a class="kouho-link" href="${it.url}" target="_blank">🛒 メルカリで見る</a>
-    </div>`).join('');
+      <a class="kouho-link" href="${it.url}" target="_blank">🛒 ${src}で見る</a>
+    </div>`;
+  }).join('');
 };
 window.updateSouba = async function() {
   const model = document.getElementById('so-model').value;

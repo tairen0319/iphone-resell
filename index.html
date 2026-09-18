@@ -34,6 +34,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 .kouho-link{display:block;text-align:center;padding:10px;background:#00BCD4;color:white;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;margin-top:8px;}
 .kouho-updated{text-align:center;color:#aaa;font-size:11px;margin-bottom:12px;}
 .kouho-screen-note{font-size:11px;color:#E65100;margin-top:4px;}
+.kouho-card.coupon{border-left-style:dashed;border-left-color:#AB47BC;background:#FAF4FC;}
+.kouho-coupon-note{font-size:11px;color:#8E24AA;font-weight:600;margin-top:4px;}
 .container{padding:16px;max-width:480px;margin:0 auto;}
 .card{background:white;border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,0.07);}
 .card h2{font-size:14px;color:#666;margin-bottom:12px;font-weight:600;}
@@ -175,6 +177,11 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
     <h2 style="font-size:14px;color:#666;margin:8px 4px 12px;font-weight:600">🔎 今日の仕入れおすすめ</h2>
     <div id="kouho-updated" class="kouho-updated"></div>
     <div id="kouho-list"><div class="loading">⏳ 読み込み中...</div></div>
+    <div id="coupon-kouho-section" style="display:none;margin-top:20px">
+      <h2 style="font-size:14px;color:#666;margin:8px 4px 12px;font-weight:600">🎟️ Yahoo!フリマ 10%クーポンありなら候補</h2>
+      <div style="font-size:11px;color:#999;margin:-6px 4px 10px;">通常価格では基準未達。10%OFFクーポンを持っている時だけ検討してください</div>
+      <div id="coupon-kouho-list"></div>
+    </div>
   </div>
   <div class="footer">Firebase同期 | iPhone転売管理</div>
 </div>
@@ -347,11 +354,15 @@ window.showPage = function(name) {
 // バッテリー代・パネル代の参照用にだけ読み込む(相場管理UIは廃止済み)。
 let soubaData = [];
 let kouhoItems = [];
+let couponKouhoItems = [];
 window.loadKouho = async function() {
   const listEl = document.getElementById('kouho-list');
   const updEl  = document.getElementById('kouho-updated');
+  const couponSection = document.getElementById('coupon-kouho-section');
+  const couponListEl  = document.getElementById('coupon-kouho-list');
   listEl.innerHTML = '<div class="loading">⏳ 読み込み中...</div>';
   updEl.textContent = '';
+  couponSection.style.display = 'none';
   const snap = await getDoc(doc(db, 'candidates', 'latest'));
   if (!snap.exists()) {
     listEl.innerHTML = '<div class="empty">🔎 まだ候補がありません(次の自動実行をお待ちください)</div>';
@@ -359,27 +370,43 @@ window.loadKouho = async function() {
   }
   const data = snap.data();
   kouhoItems = data.items || [];
+  couponKouhoItems = data.couponItems || [];
   if (data.updatedAt) {
     const d = new Date(data.updatedAt);
     updEl.textContent = `最終更新: ${d.toLocaleString('ja-JP')}`;
   }
   if (!kouhoItems.length) {
     listEl.innerHTML = '<div class="empty">🔎 今日は条件を満たす候補が見つかりませんでした</div>';
-    return;
+  } else {
+    listEl.innerHTML = kouhoItems.map((it, i) => {
+      const src = it.source === 'yahoo' ? 'Yahoo!フリマ' : 'メルカリ';
+      return `
+      <div class="kouho-card rank-${it.rank}">
+        <div><span class="rank-badge rank-${it.rank}">${it.rank}</span><span style="font-weight:700">${it.model} ${it.capacity}</span><span class="channel-chip channel-other" style="margin-left:8px">${src}</span></div>
+        <div class="kouho-title">${it.title || ''}</div>
+        <div class="kouho-row"><span>出品価格</span><span>¥${Number(it.price).toLocaleString()}</span></div>
+        <div class="kouho-row"><span>見込み利益</span><span class="kouho-profit">¥${Number(it.profit).toLocaleString()}</span></div>
+        ${it.screenCracked ? '<div class="kouho-screen-note">⚠️ 画面割れ前提で計算(パネル代込み)</div>' : '<div class="kouho-screen-note">画面状態は出品ページで要確認</div>'}
+        <a class="kouho-link" href="${it.url}" target="_blank">🛒 ${src}で見る</a>
+        <button class="btn btn-green" style="margin-top:8px" data-fn="confirmKouho" data-args='[${i}]'>✅ この候補を仕入れ確定</button>
+      </div>`;
+    }).join('');
   }
-  listEl.innerHTML = kouhoItems.map((it, i) => {
-    const src = it.source === 'yahoo' ? 'Yahoo!フリマ' : 'メルカリ';
-    return `
-    <div class="kouho-card rank-${it.rank}">
-      <div><span class="rank-badge rank-${it.rank}">${it.rank}</span><span style="font-weight:700">${it.model} ${it.capacity}</span><span class="channel-chip channel-other" style="margin-left:8px">${src}</span></div>
-      <div class="kouho-title">${it.title || ''}</div>
-      <div class="kouho-row"><span>出品価格</span><span>¥${Number(it.price).toLocaleString()}</span></div>
-      <div class="kouho-row"><span>見込み利益</span><span class="kouho-profit">¥${Number(it.profit).toLocaleString()}</span></div>
-      ${it.screenCracked ? '<div class="kouho-screen-note">⚠️ 画面割れ前提で計算(パネル代込み)</div>' : '<div class="kouho-screen-note">画面状態は出品ページで要確認</div>'}
-      <a class="kouho-link" href="${it.url}" target="_blank">🛒 ${src}で見る</a>
-      <button class="btn btn-green" style="margin-top:8px" data-fn="confirmKouho" data-args='[${i}]'>✅ この候補を仕入れ確定</button>
-    </div>`;
-  }).join('');
+  if (couponKouhoItems.length) {
+    couponSection.style.display = 'block';
+    couponListEl.innerHTML = couponKouhoItems.map((it, i) => `
+      <div class="kouho-card coupon">
+        <div><span class="rank-badge rank-${it.rank}">${it.rank}</span><span style="font-weight:700">${it.model} ${it.capacity}</span><span class="channel-chip channel-other" style="margin-left:8px">Yahoo!フリマ</span></div>
+        <div class="kouho-title">${it.title || ''}</div>
+        <div class="kouho-row"><span>出品価格</span><span>¥${Number(it.price).toLocaleString()}</span></div>
+        <div class="kouho-row"><span>10%OFF時の価格</span><span>¥${Number(it.couponPrice).toLocaleString()}</span></div>
+        <div class="kouho-row"><span>クーポン適用時の見込み利益</span><span class="kouho-profit">¥${Number(it.profit).toLocaleString()}</span></div>
+        <div class="kouho-coupon-note">🎟️ 10%OFFクーポンがある時だけ検討(通常価格では基準未達)</div>
+        ${it.screenCracked ? '<div class="kouho-screen-note">⚠️ 画面割れ前提で計算(パネル代込み)</div>' : '<div class="kouho-screen-note">画面状態は出品ページで要確認</div>'}
+        <a class="kouho-link" href="${it.url}" target="_blank">🛒 Yahoo!フリマで見る</a>
+        <button class="btn btn-green" style="margin-top:8px" data-fn="confirmCouponKouho" data-args='[${i}]'>✅ この候補を仕入れ確定</button>
+      </div>`).join('');
+  }
 };
 window.confirmKouho = async function(i) {
   const it = kouhoItems[i];
@@ -402,6 +429,32 @@ window.confirmKouho = async function(i) {
     status: '待ち', memo: it.title || '', imei: '',
     mercariUrl: it.url,
     tairenPaid: it.price,
+    ryoPaid: battery + screenCost,
+    createdAt: now.getTime()
+  });
+  showToast('✅ 在庫に追加！ ID: ' + id);
+};
+window.confirmCouponKouho = async function(i) {
+  const it = couponKouhoItems[i];
+  if (!it) return;
+  if (!confirm(`${it.model} ${it.capacity}\n出品価格¥${it.price.toLocaleString()}(クーポン適用¥${it.couponPrice.toLocaleString()})で仕入れ確定しますか？\n※10%OFFクーポンを実際に適用できることを確認してから購入してください`)) return;
+  const found      = soubaData.find(s => s.model === it.model && s.capacity === it.capacity);
+  const battery    = found?.battery || 0;
+  const screenCost = it.screenCracked ? (found?.frontPanel || 0) : 0;
+  const souba      = found?.souba || (it.couponPrice + it.profit);
+  const now = new Date();
+  const snap = await getDocs(collection(db, 'zaiko'));
+  const id  = String(snap.size + 1).padStart(2, '0');
+  await addDoc(collection(db, 'zaiko'), {
+    invId: id, date: now.toISOString().slice(0,10),
+    model: it.model, capacity: it.capacity,
+    purchasePrice: it.couponPrice,
+    partsCost: battery + screenCost,
+    battery, frontPanel: screenCost,
+    souba, profit: it.profit,
+    status: '待ち', memo: (it.title || '') + '(Yahoo!フリマ10%クーポン適用)', imei: '',
+    mercariUrl: it.url,
+    tairenPaid: it.couponPrice,
     ryoPaid: battery + screenCost,
     createdAt: now.getTime()
   });

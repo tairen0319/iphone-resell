@@ -163,9 +163,24 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
 .channel-mercari{background:#FF6B6B22;color:#CC0000;}
 .channel-jimoty{background:#4CAF5022;color:#2E7D32;}
 .channel-other{background:#9E9E9E22;color:#555;}
+#login-gate{position:fixed;inset:0;background:#1a1a2e;color:white;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;z-index:1000;}
+#login-gate h1{font-size:18px;margin-bottom:20px;}
+#login-gate input{width:100%;max-width:280px;padding:12px;margin-bottom:10px;border-radius:8px;border:none;font-size:14px;}
+#login-gate button{width:100%;max-width:280px;padding:12px;border-radius:8px;border:none;background:#4A90D9;color:white;font-weight:700;font-size:14px;cursor:pointer;}
+#login-gate .err{color:#FF8A80;font-size:12px;margin-top:10px;min-height:16px;}
+#app-root{display:none;}
 </style>
 </head>
 <body>
+<!-- ログインゲート -->
+<div id="login-gate">
+  <h1>📱 iPhone転売管理</h1>
+  <input type="email" id="login-email" placeholder="メールアドレス" autocomplete="username">
+  <input type="password" id="login-password" placeholder="パスワード" autocomplete="current-password">
+  <button id="login-btn">ログイン</button>
+  <div class="err" id="login-err"></div>
+</div>
+<div id="app-root">
 <!-- ダッシュボード -->
 <div id="page-dashboard" class="page active">
   <div class="header"><h1>📱 iPhone転売管理</h1><button class="reload-btn" data-fn="loadKouho">↻</button></div>
@@ -303,9 +318,11 @@ select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
   </div>
 </div>
 <div class="toast" id="toast"></div>
+</div><!-- /app-root -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, getDocs, addDoc, doc, getDoc, updateDoc, deleteDoc, setDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 const firebaseConfig = {
   apiKey: "AIzaSyBapimiG-dxZjyftV5kN9nIVFWVUFcjTHk",
   authDomain: "iphone-resell-dc263.firebaseapp.com",
@@ -316,6 +333,7 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 window._db = db;
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-fn]');
@@ -324,10 +342,33 @@ document.addEventListener('click', e => {
   const args = el.dataset.args ? JSON.parse(el.dataset.args) : [];
   if (typeof window[fn] === 'function') window[fn](...args);
 });
-window.addEventListener('load', async () => {
+// ========== ログインゲート ==========
+// このアプリはオーナー本人以外がFirestoreのデータ(在庫・売上等)を読めないよう、
+// Firebase Authenticationへのサインインを必須にしている。
+async function startApp() {
+  document.getElementById('login-gate').style.display = 'none';
+  document.getElementById('app-root').style.display = 'block';
   await initSouba();
   loadKouho();
+}
+setPersistence(auth, browserLocalPersistence).then(() => {
+  onAuthStateChanged(auth, user => {
+    if (user) startApp();
+  });
 });
+document.getElementById('login-btn').addEventListener('click', doLogin);
+document.getElementById('login-password').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-err');
+  errEl.textContent = '';
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+  } catch (e) {
+    errEl.textContent = 'ログインに失敗しました(メールアドレスまたはパスワードが違います)';
+  }
+}
 async function initSouba() {
   const snap = await getDocs(collection(db, 'souba'));
   soubaData = [];

@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>📱 iPhone転売管理</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;background:#f0f2f5;min-height:100vh;}
+.header{background:linear-gradient(135deg,#1a1a2e,#16213e);color:white;padding:14px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.3);}
+.header h1{font-size:16px;font-weight:700;flex:1;}
+.back-btn{color:white;background:none;border:none;font-size:22px;cursor:pointer;padding:0 4px;}
+.reload-btn{background:rgba(255,255,255,0.2);border:none;color:white;padding:6px 12px;border-radius:8px;font-size:13px;cursor:pointer;}
+.page{display:none;}.page.active{display:block;}
+.nav-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:20px;max-width:480px;margin:0 auto;}
+.nav-card{background:white;border-radius:16px;padding:24px 16px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:transform 0.15s;border:none;width:100%;}
+.nav-card:active{transform:scale(0.97);}
+.nav-card .icon{font-size:40px;margin-bottom:10px;display:block;}
+.nav-card .label{font-size:14px;font-weight:600;color:#333;}
+.nav-card .desc{font-size:11px;color:#888;margin-top:4px;}
+.card-zaiko{border-top:4px solid #FF8F00;}
+.card-uriage{border-top:4px solid #2E7D32;}
+.rank-badge{display:inline-block;font-size:13px;font-weight:800;padding:4px 10px;border-radius:8px;margin-right:8px;}
+.rank-badge.rank-S{background:#FFF3CD;color:#B8860B;}
+.rank-badge.rank-A{background:#E3F2FD;color:#1565C0;}
+.rank-badge.rank-B{background:#E8F5E9;color:#2E7D32;}
+.kouho-card{background:white;border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 2px 6px rgba(0,0,0,0.07);border-left:4px solid #e0e0e0;}
+.kouho-card.rank-S{border-left-color:#F9A825;}
+.kouho-card.rank-A{border-left-color:#1565C0;}
+.kouho-card.rank-B{border-left-color:#2E7D32;}
+.kouho-title{font-size:13px;color:#444;margin:6px 0;line-height:1.5;}
+.kouho-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;}
+.kouho-profit{font-size:18px;font-weight:800;color:#2E7D32;}
+.kouho-link{display:block;text-align:center;padding:10px;background:#00BCD4;color:white;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;margin-top:8px;}
+.kouho-updated{text-align:center;color:#aaa;font-size:11px;margin-bottom:12px;}
+.kouho-screen-note{font-size:11px;color:#E65100;margin-top:4px;}
+.kouho-card.coupon{border-left-style:dashed;border-left-color:#AB47BC;background:#FAF4FC;}
+.kouho-coupon-note{font-size:11px;color:#8E24AA;font-weight:600;margin-top:4px;}
+.container{padding:16px;max-width:480px;margin:0 auto;}
+.card{background:white;border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,0.07);}
+.card h2{font-size:14px;color:#666;margin-bottom:12px;font-weight:600;}
+label{display:block;font-size:13px;font-weight:600;color:#444;margin-bottom:4px;margin-top:12px;}
+label:first-of-type{margin-top:0;}
+select,input,textarea{width:100%;padding:12px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:15px;background:#fafafa;outline:none;-webkit-appearance:none;font-family:inherit;}
+select:focus,input:focus,textarea:focus{border-color:#4A90D9;background:white;}
+.btn{width:100%;padding:14px;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;margin-top:8px;}
+.btn-blue{background:#4A90D9;color:white;}
+.btn-green{background:#2E7D32;color:white;}
+.btn-gray{background:#f0f0f0;color:#666;}
+.btn-red{background:#C62828;color:white;}
+.btn-orange{background:#FF8F00;color:white;}
+.btn-purple{background:#7B1FA2;color:white;}
+.btn-pink{background:#E91E63;color:white;}
+.result-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:14px;}
+.result-row:last-child{border-bottom:none;}
+.result-row .val{font-weight:600;}
+.judgment{border-radius:12px;padding:16px;text-align:center;font-size:17px;font-weight:700;margin-top:8px;}
+.judgment.green{background:#C8E6C9;color:#2E7D32;}
+.judgment.yellow{background:#FFF9C4;color:#F57F17;}
+.judgment.red{background:#FFCDD2;color:#C62828;}
+.item-card{background:white;border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 2px 6px rgba(0,0,0,0.07);border-left:4px solid #e0e0e0;}
+.item-card.s-待ち{border-left-color:#9E9E9E;}
+.item-card.s-到着済み{border-left-color:#7B1FA2;}
+.item-card.s-検品済み{border-left-color:#00897B;}
+.item-card.s-出品中{border-left-color:#4A90D9;}
+.item-card.s-発送中{border-left-color:#E65100;}
+.item-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.item-model{font-size:15px;font-weight:700;}
+.item-id{font-size:10px;color:#aaa;margin-top:2px;}
+.badge{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;}
+.badge-待ち{background:#f0f0f0;color:#666;}
+.badge-到着済み{background:#F3E5F5;color:#7B1FA2;}
+.badge-検品済み{background:#E0F2F1;color:#00695C;}
+.badge-出品中{background:#E3F2FD;color:#1565C0;}
+.badge-発送中{background:#FFF3E0;color:#E65100;}
+.item-prices{display:flex;gap:12px;font-size:12px;color:#666;flex-wrap:wrap;margin-bottom:4px;}
+.item-profit{font-size:14px;font-weight:700;color:#2E7D32;}
+.item-profit.neg{color:#C62828;}
+.days-chip{font-size:11px;padding:2px 8px;border-radius:10px;background:#f0f0f0;color:#666;}
+.days-chip.warn{background:#FFF9C4;color:#F57F17;}
+.days-chip.danger{background:#FFCDD2;color:#C62828;}
+.action-row{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+.action-btn{flex:1;padding:8px;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;min-width:70px;}
+.btn-status{background:#E3F2FD;color:#1565C0;}
+.btn-sell{background:#E8F5E9;color:#2E7D32;}
+.btn-template{background:#F3E5F5;color:#7B1FA2;}
+.btn-memo{background:#FFF8E1;color:#F57F17;}
+.btn-delete{background:#FFEBEE;color:#C62828;}
+.btn-status-待ち{background:#f0f0f0;color:#666;}
+.btn-status-到着済み{background:#F3E5F5;color:#7B1FA2;}
+.btn-status-検品済み{background:#E0F2F1;color:#00695C;}
+.btn-status-出品中{background:#E3F2FD;color:#1565C0;}
+.btn-status-未出品{background:#f0f0f0;color:#666;}
+.btn-status-発送中{background:#FFF3E0;color:#E65100;}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.kpi-card{background:white;border-radius:14px;padding:14px;box-shadow:0 2px 6px rgba(0,0,0,0.07);text-align:center;}
+.kpi-card.full{grid-column:1/-1;}
+.kpi-card.highlight{border:2px solid #2E7D32;}
+.kpi-card.highlight-pink{border:2px solid #E91E63;}
+.kpi-num{font-size:22px;font-weight:800;color:#2E7D32;}
+.kpi-card.highlight .kpi-num{font-size:26px;}
+.kpi-card.highlight-pink .kpi-num{font-size:26px;color:#E91E63;}
+.kpi-lbl{font-size:11px;color:#888;margin-top:3px;}
+.summary-bar{background:white;border-radius:12px;padding:12px 16px;margin-bottom:12px;display:flex;justify-content:space-around;box-shadow:0 2px 6px rgba(0,0,0,0.07);}
+.sum-item{text-align:center;}
+.sum-num{font-size:20px;font-weight:700;color:#FF8F00;}
+.sum-lbl{font-size:11px;color:#888;margin-top:2px;}
+.tab-bar{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px;}
+.tab-btn{flex-shrink:0;padding:8px 14px;border:none;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;background:#f0f0f0;color:#666;}
+.tab-btn.active{background:#2E7D32;color:white;}
+.rank-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:13px;}
+.rank-row:last-child{border-bottom:none;}
+.rank-num{font-size:16px;font-weight:800;color:#aaa;width:24px;flex-shrink:0;}
+.rank-num.gold{color:#F9A825;}
+.rank-num.silver{color:#9E9E9E;}
+.rank-num.bronze{color:#A1887F;}
+.rank-label{flex:1;margin:0 10px;}
+.rank-val{font-weight:700;color:#2E7D32;font-size:13px;}
+.period-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:13px;}
+.period-row:last-child{border-bottom:none;}
+.period-label{font-weight:600;color:#333;}
+.period-sub{font-size:11px;color:#888;margin-top:2px;}
+.period-right{text-align:right;}
+.period-profit{font-weight:700;color:#2E7D32;font-size:14px;}
+.period-count{font-size:11px;color:#888;}
+.seisan-result{border-radius:16px;padding:20px;text-align:center;margin:14px 0;}
+.seisan-result.pay{background:linear-gradient(135deg,#FCE4EC,#F8BBD0);border:2px solid #E91E63;}
+.seisan-result.even{background:linear-gradient(135deg,#E8F5E9,#C8E6C9);border:2px solid #2E7D32;}
+.seisan-who{font-size:14px;color:#555;margin-bottom:6px;}
+.seisan-amount{font-size:32px;font-weight:800;color:#E91E63;}
+.seisan-result.even .seisan-amount{color:#2E7D32;}
+.seisan-label{font-size:13px;color:#888;margin-top:4px;}
+.seisan-detail-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:13px;}
+.seisan-detail-row:last-child{border-bottom:none;}
+.seisan-detail-row .s-val{font-weight:700;}
+.seisan-detail-row .s-val.tairen{color:#4A90D9;}
+.seisan-detail-row .s-val.ryo{color:#FF8F00;}
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;}
+.modal-overlay.show{display:flex;}
+.modal{background:white;border-radius:16px;padding:24px;width:90%;max-width:400px;max-height:90vh;overflow-y:auto;}
+.modal h3{font-size:16px;margin-bottom:16px;font-weight:700;}
+.modal-btns{display:flex;gap:8px;margin-top:12px;}
+.modal-btns button{flex:1;padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;}
+.modal-ok{background:#2E7D32;color:white;}
+.modal-ok-red{background:#C62828;color:white;}
+.modal-cancel{background:#f0f0f0;color:#666;}
+.template-output{width:100%;height:260px;padding:12px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:12px;background:#fafafa;font-family:inherit;resize:none;line-height:1.6;}
+.title-output{width:100%;padding:12px;border:1.5px solid #4A90D9;border-radius:10px;font-size:13px;background:#EBF4FF;font-family:inherit;resize:none;line-height:1.6;font-weight:600;color:#1a1a2e;}
+.copy-btn{width:100%;padding:14px;background:#7B1FA2;color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;}
+.copy-btn.copied{background:#2E7D32;}
+.copy-title-btn{width:100%;padding:10px;background:#4A90D9;color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-top:6px;}
+.copy-title-btn.copied{background:#2E7D32;}
+.section-label{font-size:11px;font-weight:700;color:#7B1FA2;text-transform:uppercase;letter-spacing:0.5px;margin-top:14px;margin-bottom:4px;}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#333;color:white;padding:12px 24px;border-radius:24px;font-size:14px;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;}
+.loading{text-align:center;padding:40px;color:#888;font-size:15px;}
+.empty{text-align:center;padding:40px;color:#aaa;font-size:15px;}
+.souba-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:13px;}
+.souba-row:last-child{border-bottom:none;}
+.souba-price{font-weight:700;color:#1565C0;}
+.footer{text-align:center;color:#aaa;font-size:11px;padding:20px;}
+.channel-chip{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600;margin-left:6px;}
+.channel-mercari{background:#FF6B6B22;color:#CC0000;}
+.channel-yahoo{background:#FF004B22;color:#C2003A;}
+.channel-jimoty{background:#4CAF5022;color:#2E7D32;}
+.channel-other{background:#9E9E9E22;color:#555;}
+#login-gate{position:fixed;inset:0;background:#1a1a2e;color:white;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;z-index:1000;}
+#login-gate h1{font-size:18px;margin-bottom:20px;}
+#login-gate input{width:100%;max-width:280px;padding:12px;margin-bottom:10px;border-radius:8px;border:none;font-size:14px;}
+#login-gate button{width:100%;max-width:280px;padding:12px;border-radius:8px;border:none;background:#4A90D9;color:white;font-weight:700;font-size:14px;cursor:pointer;}
+#login-gate .err{color:#FF8A80;font-size:12px;margin-top:10px;min-height:16px;}
+#app-root{display:none;}
+.souba-open-btn{padding:4px 10px;font-size:12px;}
+#souba-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;align-items:flex-end;justify-content:center;}
+#souba-modal.show{display:flex;}
+.souba-sheet{background:#fff;width:100%;max-width:520px;max-height:85vh;border-radius:16px 16px 0 0;display:flex;flex-direction:column;}
+.souba-sheet-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #eee;font-weight:700;font-size:15px;}
+.souba-sheet-head button{background:none;border:none;font-size:22px;cursor:pointer;color:#666;}
+.souba-body{overflow-y:auto;padding:4px 16px 20px;}
+.souba-model{font-size:13px;font-weight:700;color:#7B1FA2;margin:14px 0 2px;}
+.souba-cap{color:#555;}
+.souba-grid{display:grid;grid-template-columns:56px 1fr 1fr 1fr;gap:4px;align-items:center;padding:9px 0;border-bottom:1px solid #f0f0f0;font-size:13px;text-align:right;}
+.souba-grid-head{position:sticky;top:0;background:#fff;font-size:11px;color:#999;font-weight:600;border-bottom:1px solid #ddd;padding:8px 0;}
+.souba-grid .souba-cap{text-align:left;}
+.souba-meta{font-size:10px;color:#999;font-weight:400;margin-top:1px;}
+.souba-big{color:#D32F2F;font-weight:700;}
+.souba-updated{font-size:11px;color:#999;text-align:right;padding:6px 0 0;}
+</style>
+</head>
+<body>
+<!-- ログインゲート -->
+<div id="login-gate">
+  <h1>📱 iPhone転売管理</h1>
+  <input type="email" id="login-email" placeholder="メールアドレス" autocomplete="username">
+  <input type="password" id="login-password" placeholder="パスワード" autocomplete="current-password">
+  <button id="login-btn">ログイン</button>
+  <div class="err" id="login-err"></div>
+</div>
+<div id="app-root">
+<!-- ダッシュボード -->
+<div id="page-dashboard" class="page active">
+  <div class="header"><h1>📱 iPhone転売管理</h1><button class="reload-btn souba-open-btn" data-fn="openSouba">相場</button><button class="reload-btn" data-fn="loadKouho">↻</button></div>
+  <div class="nav-grid">
+    <button class="nav-card card-zaiko"  data-fn="showPage" data-args='["zaiko"]'><span class="icon">📦</span><div class="label">在庫一覧</div><div class="desc">ステータス管理</div></button>
+    <button class="nav-card card-uriage" data-fn="showPage" data-args='["uriage"]'><span class="icon">💰</span><div class="label">売上サマリー</div><div class="desc">利益・件数を確認</div></button>
+  </div>
+  <div class="container" style="padding-top:4px">
+    <h2 style="font-size:14px;color:#666;margin:8px 4px 12px;font-weight:600">🔎 今日の仕入れおすすめ</h2>
+    <div id="kouho-updated" class="kouho-updated"></div>
+    <div id="kouho-list"><div class="loading">⏳ 読み込み中...</div></div>
+    <div id="coupon-kouho-section" style="display:none;margin-top:20px">
+      <h2 style="font-size:14px;color:#666;margin:8px 4px 12px;font-weight:600">🎟️ Yahoo!フリマ 10%クーポンありなら候補</h2>
+      <div style="font-size:11px;color:#999;margin:-6px 4px 10px;">通常価格では基準未達。10%OFFクーポンを持っている時だけ検討してください</div>
+      <div id="coupon-kouho-list"></div>
+    </div>
+  </div>
+  <div class="footer">Firebase同期 | iPhone転売管理</div>
+</div>
+<!-- 相場モーダル -->
+<div id="souba-modal" data-fn="closeSoubaBg"><div class="souba-sheet">
+  <div class="souba-sheet-head"><span>📊 現在の相場</span><button data-fn="closeSouba">×</button></div>
+  <div class="souba-body" id="souba-body"></div>
+</div></div>
+<!-- 在庫一覧 -->
+<div id="page-zaiko" class="page">
+  <div class="header"><button class="back-btn" data-fn="showPage" data-args='["dashboard"]'>←</button><h1>📦 在庫一覧</h1><button class="reload-btn" data-fn="loadZaiko">↻</button></div>
+  <div class="container">
+    <div class="summary-bar">
+      <div class="sum-item"><div class="sum-num" id="z-count">-</div><div class="sum-lbl">在庫数</div></div>
+      <div class="sum-item"><div class="sum-num" id="z-profit">-</div><div class="sum-lbl">予想利益計</div></div>
+      <div class="sum-item"><div class="sum-num" id="z-days">-</div><div class="sum-lbl">平均滞留</div></div>
+    </div>
+    <div id="z-list"><div class="loading">⏳ 読み込み中...</div></div>
+  </div>
+</div>
+<!-- 売上サマリー -->
+<div id="page-uriage" class="page">
+  <div class="header"><button class="back-btn" data-fn="showPage" data-args='["dashboard"]'>←</button><h1>💰 売上サマリー</h1><button class="reload-btn" data-fn="loadUriage">↻</button></div>
+  <div class="container"><div id="u-content"><div class="loading">⏳ 読み込み中...</div></div></div>
+</div>
+<!-- ステータス変更モーダル -->
+<div class="modal-overlay" id="statusModal">
+  <div class="modal">
+    <h3 id="modal-title">ステータス変更</h3>
+    <label>ステータス</label>
+    <select id="modal-status" onchange="toggleListingUrlArea()"><option>待ち</option><option>到着済み</option><option>検品済み</option><option>出品中</option><option>発送中</option><option>未出品</option></select>
+    <div id="modal-listing-url-area" style="display:none;margin-top:12px">
+      <label>出品URL（メルカリ）</label>
+      <input type="url" id="modal-listing-url" placeholder="https://jp.mercari.com/item/..." style="font-size:13px;">
+    </div>
+    <div id="modal-sell-area" style="display:none;margin-top:12px">
+      <label>売却価格（円）</label>
+      <input type="number" id="modal-sell-price" placeholder="例: 18000" inputmode="numeric">
+      <label>販売先</label>
+      <select id="modal-channel">
+        <option value="メルカリ">メルカリ</option>
+        <option value="Yahoo!フリマ">Yahoo!フリマ</option>
+        <option value="ジモティー">ジモティー</option>
+        <option value="その他">その他</option>
+      </select>
+      <label>出品アカウント</label>
+      <select id="modal-account">
+        <option value="たいれん">たいれん</option>
+        <option value="りょう">りょう</option>
+      </select>
+      <div style="margin-top:14px;padding:10px;background:#f8f8f8;border-radius:10px;">
+        <div style="font-size:12px;font-weight:700;color:#444;margin-bottom:8px;">📝 経費を確認・変更</div>
+        <label>バッテリー代（円）</label>
+        <input type="number" id="modal-battery" placeholder="例: 1500" inputmode="numeric">
+        <label>フロントパネル代（円）</label>
+        <input type="number" id="modal-front-panel" placeholder="例: 3000" inputmode="numeric">
+        <label>パーツ送料（円）</label>
+        <input type="number" id="modal-parts-sending" placeholder="例: 770" inputmode="numeric">
+        <label>手数料（円）</label>
+        <input type="number" id="modal-fee" placeholder="自動計算（メルカリ10%/Yahoo!フリマ5%）" inputmode="numeric">
+        <label>発送送料（円）</label>
+        <input type="number" id="modal-shipping" placeholder="例: 520" inputmode="numeric">
+      </div>
+      <div id="modal-profit-preview" style="display:none;margin-top:12px;padding:12px;border-radius:10px;text-align:center;">
+        <div style="font-size:11px;color:#666;margin-bottom:4px;">計算式: 売却価格 - 手数料 - 送料 - 仕入れ値 - バッテリー - パネル - パーツ送料</div>
+        <div id="modal-profit-val" style="font-size:20px;font-weight:800;"></div>
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-cancel" data-fn="closeModal">キャンセル</button>
+      <button class="modal-ok" data-fn="applyStatus">確定</button>
+    </div>
+  </div>
+</div>
+<!-- 削除確認モーダル -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <h3>🗑️ 削除確認</h3>
+    <p id="delete-msg" style="font-size:14px;color:#444;margin-bottom:8px;line-height:1.6;"></p>
+    <p style="font-size:12px;color:#C62828;font-weight:600;">この操作は元に戻せません</p>
+    <div class="modal-btns">
+      <button class="modal-cancel" data-fn="closeDeleteModal">キャンセル</button>
+      <button class="modal-ok-red" data-fn="execDelete">削除する</button>
+    </div>
+  </div>
+</div>
+<!-- メモ編集モーダル -->
+<div class="modal-overlay" id="memoModal">
+  <div class="modal">
+    <h3>📝 メモを編集</h3>
+    <label>メモ</label>
+    <textarea id="memo-input" placeholder="例: バッテリー膨張あり、画面キズ小" rows="4" style="resize:vertical;"></textarea>
+    <div class="modal-btns">
+      <button class="modal-cancel" data-fn="closeMemoModal">キャンセル</button>
+      <button class="modal-ok" data-fn="saveMemo">保存</button>
+    </div>
+  </div>
+</div>
+<!-- 出品テンプレモーダル -->
+<div class="modal-overlay" id="templateModal">
+  <div class="modal">
+    <h3>📝 出品テンプレ生成</h3>
+    <label>カラー</label>
+    <input type="text" id="tmpl-color" placeholder="例：スターライト、ブラック、レッド">
+    <label>IMEI</label>
+    <input type="text" id="tmpl-imei" placeholder="例：354123456789012" inputmode="numeric">
+    <label>画面の状態</label>
+    <input type="text" id="tmpl-screen" placeholder="例：新品交換済み / 割れなし・傷なし">
+    <label>背面の状態</label>
+    <input type="text" id="tmpl-back" placeholder="例：細かいすり傷あり">
+    <label>側面の状態</label>
+    <input type="text" id="tmpl-side" placeholder="例：傷なし">
+    <label>カメラ周りの状態</label>
+    <input type="text" id="tmpl-camera" placeholder="例：傷なし">
+    <button class="btn btn-purple" data-fn="generateTemplate" style="margin-top:10px">📝 タイトル＆テンプレを生成</button>
+    <div id="tmpl-result" style="display:none;margin-top:14px">
+      <div class="section-label">🏷️ 商品タイトル（コピーして使用）</div>
+      <textarea class="title-output" id="tmpl-title-text" readonly rows="3"></textarea>
+      <button class="copy-title-btn" id="tmpl-title-copy-btn" data-fn="copyTitle">📋 タイトルをコピー</button>
+      <div class="section-label" style="margin-top:14px">📄 商品説明文</div>
+      <textarea class="template-output" id="tmpl-text" readonly></textarea>
+      <button class="copy-btn" id="tmpl-copy-btn" data-fn="copyTemplate">📋 説明文をコピーする</button>
+    </div>
+    <button class="modal-cancel" data-fn="closeTemplateModal" style="width:100%;padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px">閉じる</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+</div><!-- /app-root -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs, addDoc, doc, getDoc, updateDoc, deleteDoc, setDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyBapimiG-dxZjyftV5kN9nIVFWVUFcjTHk",
+  authDomain: "iphone-resell-dc263.firebaseapp.com",
+  projectId: "iphone-resell-dc263",
+  storageBucket: "iphone-resell-dc263.firebasestorage.app",
+  messagingSenderId: "993125357871",
+  appId: "1:993125357871:web:782bc724a9ba7f291469da"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+window._db = db;
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-fn]');
+  if (!el) return;
+  const fn = el.dataset.fn;
+  const args = el.dataset.args ? JSON.parse(el.dataset.args) : [];
+  if (typeof window[fn] === 'function') window[fn](...args);
+});
+// ========== ログインゲート ==========
+// このアプリはオーナー本人以外がFirestoreのデータ(在庫・売上等)を読めないよう、
+// Firebase Authenticationへのサインインを必須にしている。
+async function startApp() {
+  document.getElementById('login-gate').style.display = 'none';
+  document.getElementById('app-root').style.display = 'block';
+  await initSouba();
+  loadKouho();
+}
+setPersistence(auth, browserLocalPersistence).then(() => {
+  onAuthStateChanged(auth, user => {
+    if (user) startApp();
+  });
+});
+document.getElementById('login-btn').addEventListener('click', doLogin);
+document.getElementById('login-password').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-err');
+  errEl.textContent = '';
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+  } catch (e) {
+    errEl.textContent = 'ログインに失敗しました(メールアドレスまたはパスワードが違います)';
+  }
+}
+async function initSouba() {
+  const snap = await getDocs(collection(db, 'souba'));
+  soubaData = [];
+  snap.forEach(d => soubaData.push({id: d.id, ...d.data()}));
+  if (soubaData.length > 0) return;
+  try {
+    const res = await fetch('souba.json');
+    const data = await res.json();
+    for (const item of data) {
+      await setDoc(doc(db, 'souba', item.model + '_' + item.capacity), item);
+    }
+    soubaData = data;
+  } catch(e) { console.log('souba.json not found, skipping initial load'); }
+}
+function soubaMeta(s) {
+  const parts = [];
+  if (s.prevSouba && s.prevSouba !== s.souba) {
+    const pct = (s.souba - s.prevSouba) / s.prevSouba * 100;
+    const big = Math.abs(pct) >= 5 ? ' souba-big' : '';
+    parts.push(`<span class="${big}">${pct > 0 ? '▲' : '▼'}${Math.abs(pct).toFixed(1)}%</span>`);
+  } else if (s.prevSouba) {
+    parts.push('<span>±0%</span>');
+  }
+  if (s.sampleCount) parts.push(`n=${s.sampleCount}${s.sampleMin < 15 ? '<span class="souba-big">⚠少</span>' : ''}`);
+  const note = s.note ? '<div class="souba-meta souba-big">手動調整あり</div>' : '';
+  return (parts.length ? `<div class="souba-meta">${parts.join(' · ')}</div>` : '') + note;
+}
+window.openSouba = function() {
+  const groups = {};
+  // 現在の仕入れ対象(13/14/15無印の128〜512GB、13 Pro Maxの128/256GB)だけを表示する。
+  // 対象を増やしたらここのリストも足すこと(Firestoreのデータ自体は消していない)。
+  const targets = {'iPhone 13': ['128GB','256GB','512GB'], 'iPhone 14': ['128GB','256GB','512GB'], 'iPhone 15': ['128GB','256GB','512GB'], 'iPhone 13 Pro Max': ['128GB','256GB']};
+  soubaData.filter(s => (targets[s.model] || []).includes(s.capacity)).forEach(s => { (groups[s.model] = groups[s.model] || []).push(s); });
+  const capNum = c => parseInt(c) || 0;
+  const modelNum = m => parseInt((m.match(/\d+/) || [0])[0]);
+  const names = Object.keys(groups).sort((a, b) => modelNum(b) - modelNum(a) || a.length - b.length);
+  const head = '<div class="souba-grid souba-grid-head"><span></span><span>相場</span><span>バッテリー代</span><span>パネル代</span></div>';
+  const stamps = soubaData.map(s => s.updatedAt).filter(Boolean).sort();
+  const latest = stamps.length ? new Date(stamps[stamps.length - 1]).toLocaleDateString('ja-JP') : '未記録';
+  const upd = `<div class="souba-updated">最終更新: ${latest}</div>`;
+  document.getElementById('souba-body').innerHTML = names.length ? upd + head + names.map(m => `
+    <div class="souba-model">${m}</div>
+    ${groups[m].sort((a, b) => capNum(a.capacity) - capNum(b.capacity)).map(s => `
+      <div class="souba-grid"><span class="souba-cap">${s.capacity}</span><span><span class="souba-price">¥${Number(s.souba).toLocaleString()}</span>${soubaMeta(s)}</span><span>¥${Number(s.battery || 0).toLocaleString()}</span><span>¥${Number(s.frontPanel || 0).toLocaleString()}</span></div>`).join('')}
+  `).join('') : '<div class="empty">相場データがありません</div>';
+  document.getElementById('souba-modal').classList.add('show');
+};
+window.closeSouba = function() { document.getElementById('souba-modal').classList.remove('show'); };
+window.closeSoubaBg = function() { if (event.target.id === 'souba-modal') closeSouba(); };
+window.showPage = function(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  window.scrollTo(0, 0);
+  if (name === 'zaiko')     loadZaiko();
+  if (name === 'uriage')    loadUriage();
+  if (name === 'dashboard') loadKouho();
+};
+// souba(相場)データはiphone-souba-updateスキルが更新する。ここでは仕入れ確定時の
+// バッテリー代・パネル代の参照用にだけ読み込む(相場管理UIは廃止済み)。
+let soubaData = [];
+let kouhoItems = [];
+let couponKouhoItems = [];
+window.loadKouho = async function() {
+  const listEl = document.getElementById('kouho-list');
+  const updEl  = document.getElementById('kouho-updated');
+  const couponSection = document.getElementById('coupon-kouho-section');
+  const couponListEl  = document.getElementById('coupon-kouho-list');
+  listEl.innerHTML = '<div class="loading">⏳ 読み込み中...</div>';
+  updEl.textContent = '';
+  couponSection.style.display = 'none';
+  const snap = await getDoc(doc(db, 'candidates', 'latest'));
+  if (!snap.exists()) {
+    listEl.innerHTML = '<div class="empty">🔎 まだ候補がありません(次の自動実行をお待ちください)</div>';
+    return;
+  }
+  const data = snap.data();
+  kouhoItems = data.items || [];
+  couponKouhoItems = data.couponItems || [];
+  if (data.updatedAt) {
+    const d = new Date(data.updatedAt);
+    updEl.textContent = `最終更新: ${d.toLocaleString('ja-JP')}`;
+  }
+  if (!kouhoItems.length) {
+    listEl.innerHTML = '<div class="empty">🔎 今日は条件を満たす候補が見つかりませんでした</div>';
+  } else {
+    listEl.innerHTML = kouhoItems.map((it, i) => {
+      const src = it.source === 'yahoo' ? 'Yahoo!フリマ' : 'メルカリ';
+      const found = soubaData.find(s => s.model === it.model && s.capacity === it.capacity);
+      return `
+      <div class="kouho-card rank-${it.rank}">
+        <div><span class="rank-badge rank-${it.rank}">${it.rank}</span><span style="font-weight:700">${it.model} ${it.capacity}</span><span class="channel-chip channel-other" style="margin-left:8px">${src}</span></div>
+        <div class="kouho-title">${it.title || ''}</div>
+        <div class="kouho-row"><span>出品価格</span><span>¥${Number(it.price).toLocaleString()}</span></div>
+        ${found ? `<div class="kouho-row"><span>売却相場</span><span class="souba-price">¥${Number(found.souba).toLocaleString()}</span></div>` : ''}
+        <div class="kouho-row"><span>見込み利益</span><span class="kouho-profit">¥${Number(it.profit).toLocaleString()}</span></div>
+        ${it.screenCracked ? '<div class="kouho-screen-note">⚠️ 画面割れ前提で計算(パネル代込み)</div>' : '<div class="kouho-screen-note">画面状態は出品ページで要確認</div>'}
+        <a class="kouho-link" href="${it.url}" target="_blank">🛒 ${src}で見る</a>
+        <button class="btn btn-green" style="margin-top:8px" data-fn="confirmKouho" data-args='[${i}]'>✅ この候補を仕入れ確定</button>
+      </div>`;
+    }).join('');
+  }
+  if (couponKouhoItems.length) {
+    couponSection.style.display = 'block';
+    couponListEl.innerHTML = couponKouhoItems.map((it, i) => {
+      const found = soubaData.find(s => s.model === it.model && s.capacity === it.capacity);
+      return `
+      <div class="kouho-card coupon">
+        <div><span class="rank-badge rank-${it.rank}">${it.rank}</span><span style="font-weight:700">${it.model} ${it.capacity}</span><span class="channel-chip channel-other" style="margin-left:8px">Yahoo!フリマ</span></div>
+        <div class="kouho-title">${it.title || ''}</div>
+        <div class="kouho-row"><span>出品価格</span><span>¥${Number(it.price).toLocaleString()}</span></div>
+        ${found ? `<div class="kouho-row"><span>売却相場</span><span class="souba-price">¥${Number(found.souba).toLocaleString()}</span></div>` : ''}
+        <div class="kouho-row"><span>10%OFF時の価格</span><span>¥${Number(it.couponPrice).toLocaleString()}</span></div>
+        <div class="kouho-row"><span>クーポン適用時の見込み利益</span><span class="kouho-profit">¥${Number(it.profit).toLocaleString()}</span></div>
+        <div class="kouho-coupon-note">🎟️ 10%OFFクーポンがある時だけ検討(通常価格では基準未達)</div>
+        ${it.screenCracked ? '<div class="kouho-screen-note">⚠️ 画面割れ前提で計算(パネル代込み)</div>' : '<div class="kouho-screen-note">画面状態は出品ページで要確認</div>'}
+        <a class="kouho-link" href="${it.url}" target="_blank">🛒 Yahoo!フリマで見る</a>
+        <button class="btn btn-green" style="margin-top:8px" data-fn="confirmCouponKouho" data-args='[${i}]'>✅ この候補を仕入れ確定</button>
+      </div>`;
+    }).join('');
+  }
+};
+window.confirmKouho = async function(i) {
+  const it = kouhoItems[i];
+  if (!it) return;
+  if (!confirm(`${it.model} ${it.capacity}\n¥${it.price.toLocaleString()} で仕入れ確定しますか？`)) return;
+  const found      = soubaData.find(s => s.model === it.model && s.capacity === it.capacity);
+  const battery    = found?.battery || 0;
+  const screenCost = it.screenCracked ? (found?.frontPanel || 0) : 0;
+  const souba      = found?.souba || (it.price + it.profit);
+  const now = new Date();
+  const snap = await getDocs(collection(db, 'zaiko'));
+  const id  = String(snap.size + 1).padStart(2, '0');
+  await addDoc(collection(db, 'zaiko'), {
+    invId: id, date: now.toISOString().slice(0,10),
+    model: it.model, capacity: it.capacity,
+    purchasePrice: it.price,
+    partsCost: battery + screenCost,
+    battery, frontPanel: screenCost,
+    souba, profit: it.profit,
+    status: '待ち', memo: it.title || '', imei: '',
+    mercariUrl: it.url,
+    tairenPaid: it.price,
+    ryoPaid: battery + screenCost,
+    createdAt: now.getTime()
+  });
+  showToast('✅ 在庫に追加！ ID: ' + id);
+};
+window.confirmCouponKouho = async function(i) {
+  const it = couponKouhoItems[i];
+  if (!it) return;
+  if (!confirm(`${it.model} ${it.capacity}\n出品価格¥${it.price.toLocaleString()}(クーポン適用¥${it.couponPrice.toLocaleString()})で仕入れ確定しますか？\n※10%OFFクーポンを実際に適用できることを確認してから購入してください`)) return;
+  const found      = soubaData.find(s => s.model === it.model && s.capacity === it.capacity);
+  const battery    = found?.battery || 0;
+  const screenCost = it.screenCracked ? (found?.frontPanel || 0) : 0;
+  const souba      = found?.souba || (it.couponPrice + it.profit);
+  const now = new Date();
+  const snap = await getDocs(collection(db, 'zaiko'));
+  const id  = String(snap.size + 1).padStart(2, '0');
+  await addDoc(collection(db, 'zaiko'), {
+    invId: id, date: now.toISOString().slice(0,10),
+    model: it.model, capacity: it.capacity,
+    purchasePrice: it.couponPrice,
+    partsCost: battery + screenCost,
+    battery, frontPanel: screenCost,
+    souba, profit: it.profit,
+    status: '待ち', memo: (it.title || '') + '(Yahoo!フリマ10%クーポン適用)', imei: '',
+    mercariUrl: it.url,
+    tairenPaid: it.couponPrice,
+    ryoPaid: battery + screenCost,
+    createdAt: now.getTime()
+  });
+  showToast('✅ 在庫に追加！ ID: ' + id);
+};
+// ========== 在庫一覧 ==========
+let zaikoList = [];
+let currentDocId = null;
+let templateItem = null;
+let memoDocId = null;
+window.loadZaiko = async function() {
+  document.getElementById('z-list').innerHTML = '<div class="loading">⏳ 読み込み中...</div>';
+  const snap = await getDocs(query(collection(db, 'zaiko'), orderBy('createdAt', 'desc')));
+  zaikoList = [];
+  snap.forEach(d => zaikoList.push({docId: d.id, ...d.data()}));
+  renderZaiko();
+};
+function renderZaiko() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const el = document.getElementById('z-list');
+  if (!zaikoList.length) {
+    el.innerHTML = '<div class="empty">📦 在庫はありません</div>';
+    document.getElementById('z-count').textContent = '0台';
+    document.getElementById('z-profit').textContent = '¥0';
+    document.getElementById('z-days').textContent = '0日';
+    return;
+  }
+  let totalProfit = 0, totalDays = 0;
+  const html = zaikoList.map(r => {
+    const days = r.date ? Math.floor((today - new Date(r.date)) / 86400000) : 0;
+    const profit = Number(r.profit) || 0;
+    totalProfit += profit; totalDays += days;
+    const dc = days >= 30 ? 'danger' : days >= 14 ? 'warn' : '';
+    return `<div class="item-card s-${r.status}">
+      <div class="item-top">
+        <div>
+          <div class="item-model">${r.model} ${r.capacity}</div>
+          <div class="item-id">${r.invId} | ${r.date}${r.imei ? ' | IMEI: ' + r.imei : ''}</div>
+        </div>
+        <span class="badge badge-${r.status}">${r.status}</span>
+      </div>
+      <div class="item-prices">
+        <span>仕入: ¥${Number(r.purchasePrice).toLocaleString()}</span>
+        <span>相場: ¥${Number(r.souba).toLocaleString()}</span>
+        <span class="days-chip ${dc}">${days}日</span>
+      </div>
+      <div class="item-profit ${profit<0?'neg':''}">予想利益: ${fmt(profit)}</div>
+      ${r.memo ? `<div style="font-size:12px;color:#888;margin-top:4px">📝 ${r.memo}</div>` : ''}
+      ${r.mercariUrl ? `<div style="margin-top:6px"><a href="${r.mercariUrl}" target="_blank" style="font-size:12px;color:#888;text-decoration:none;font-weight:600;">🛒 商品仕入れページ</a></div>` : ''}
+      ${r.listingUrl ? `<div style="margin-top:4px"><a href="${r.listingUrl}" target="_blank" style="font-size:12px;color:#1565C0;text-decoration:none;font-weight:600;">🔗 商品出品URL</a></div>` : ''}
+      <div class="action-row">
+        <button class="action-btn btn-status-${r.status}"   data-fn="openModal" data-args='["${r.docId}", "${r.status}", false]'>📋 ${r.status}</button>
+        <button class="action-btn btn-sell"     data-fn="openModal" data-args='["${r.docId}", "${r.status}", true]'>💰 売却</button>
+        <button class="action-btn btn-template" data-fn="openTemplateModal" data-args='["${r.docId}"]'>📝 テンプレ</button>
+        <button class="action-btn btn-memo"     data-fn="openMemoModal" data-args='["${r.docId}"]'>✏️ メモ</button>
+        <button class="action-btn btn-delete"   data-fn="openDeleteModal" data-args='["zaiko", "${r.docId}", "${r.model} ${r.capacity}"]'>🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+  el.innerHTML = html;
+  document.getElementById('z-count').textContent  = zaikoList.length + '台';
+  document.getElementById('z-profit').textContent = fmt(totalProfit);
+  document.getElementById('z-days').textContent   = Math.round(totalDays / zaikoList.length) + '日';
+}
+// ========== メモ編集モーダル ==========
+window.openMemoModal = function(docId) {
+  memoDocId = docId;
+  const item = zaikoList.find(r => r.docId === docId);
+  document.getElementById('memo-input').value = item ? (item.memo || '') : '';
+  document.getElementById('memoModal').classList.add('show');
+};
+window.closeMemoModal = function() {
+  document.getElementById('memoModal').classList.remove('show');
+};
+window.saveMemo = async function() {
+  if (!memoDocId) return;
+  const memo = document.getElementById('memo-input').value;
+  await updateDoc(doc(db, 'zaiko', memoDocId), { memo });
+  closeMemoModal();
+  showToast('✅ メモを保存しました');
+  loadZaiko();
+};
+// ========== 削除モーダル ==========
+let deleteTarget = { collection: '', docId: '', label: '' };
+window.openDeleteModal = function(col, docId, label) {
+  deleteTarget = { collection: col, docId, label };
+  document.getElementById('delete-msg').textContent = `「${label}」を削除してよいですか？`;
+  document.getElementById('deleteModal').classList.add('show');
+};
+window.closeDeleteModal = function() {
+  document.getElementById('deleteModal').classList.remove('show');
+};
+window.execDelete = async function() {
+  closeDeleteModal();
+  await deleteDoc(doc(db, deleteTarget.collection, deleteTarget.docId));
+  showToast('🗑️ 削除しました');
+  if (deleteTarget.collection === 'zaiko')  loadZaiko();
+  if (deleteTarget.collection === 'uriage') loadUriage();
+};
+// ========== 出品テンプレ ==========
+window.openTemplateModal = function(docId) {
+  templateItem = zaikoList.find(r => r.docId === docId);
+  if (!templateItem) return;
+  document.getElementById('tmpl-imei').value   = templateItem.imei || '';
+  document.getElementById('tmpl-color').value  = templateItem.color || '';
+  document.getElementById('tmpl-screen').value = templateItem.frontPanel > 0 ? '新品交換済み' : '';
+  document.getElementById('tmpl-back').value   = '';
+  document.getElementById('tmpl-side').value   = '';
+  document.getElementById('tmpl-camera').value = '';
+  document.getElementById('tmpl-result').style.display = 'none';
+  document.getElementById('tmpl-copy-btn').textContent = '📋 説明文をコピーする';
+  document.getElementById('tmpl-copy-btn').classList.remove('copied');
+  document.getElementById('tmpl-title-copy-btn').textContent = '📋 タイトルをコピー';
+  document.getElementById('tmpl-title-copy-btn').classList.remove('copied');
+  document.getElementById('templateModal').classList.add('show');
+};
+window.closeTemplateModal = function() {
+  document.getElementById('templateModal').classList.remove('show');
+};
+window.generateTemplate = function() {
+  if (!templateItem) return;
+  const imei        = document.getElementById('tmpl-imei').value   || '【IMEIを入力】';
+  const color       = document.getElementById('tmpl-color').value  || '';
+  const screenState = document.getElementById('tmpl-screen').value || '【画面の状態を入力】';
+  const backState   = document.getElementById('tmpl-back').value   || '【背面の状態を入力】';
+  const sideState   = document.getElementById('tmpl-side').value   || '【側面の状態を入力】';
+  const cameraState = document.getElementById('tmpl-camera').value || '【カメラ周りの状態を入力】';
+  const model    = templateItem.model;
+  const capacity = templateItem.capacity;
+  const seq      = templateItem.invId || '';
+  const title = `${model} ${capacity} 新品バッテリー100%${color ? ' ' + color : ''}`;
+  const colorLine = color ? `・カラー　：${color}\n` : '';
+  const tags = buildTags(model);
+  const text =
+`バッテリー新品交換済・最大容量100%
+中古iPhone最大の不安を解消！交換済みのため、新品同様にお使いいただけます。
+
+！！無料特典！！
+スマホコーティングキット付き！
+スマホ用コーティング剤をセットでお届けいたします。
+キズ・指紋が付きにくくフィルム不要のサラサラ操作感が続きます。
+
+■ フォロー割実施中！
+購入前にフォロー＋「フォロー割希望」とコメントで300円引きいたします！
+他にもiPhone端末出品中 → #即購入OKですのiphone
+
+■ 機種概要
+・機種名　：${model}
+${colorLine}・容量　　：${capacity}
+・SIM　　：SIMフリー（ロック解除済）
+・ネットワーク利用制限：〇（問題なし）
+・アクティベーションロック：解除済
+・初期化　：全て初期化済
+・IMEI　：${imei}
+
+■ 商品状態
+・画面　　　：${screenState}
+・背面　　　：${backState}
+・側面　　　：${sideState}
+・カメラ周り：${cameraState}
+・バッテリー：新品交換済・最大容量100%！！
+
+◽️動作確認
+起動・充電・カメラ・各種ボタン・電波・液晶・タッチパネル・Face ID全て確認済み
+
+■ 梱包・発送
+・緩衝材で丁寧に梱包してお届けします
+・ご購入後24時間以内に発送いたします
+
+■ ご購入前のご注意
+・中古品のため微細な傷・使用感があります
+・新品同様をお求めの方はご遠慮ください
+・他フリマサイトと同時出品中のため、売り切れの場合はご了承ください
+
+■ 初期保証（到着から7日間）
+・動作確認項目に関する明確な不具合のみ対象
+・修理・交換・返品のいずれかで対応いたします
+・外観や色味など感覚的な違いによる返品は対象外です
+
+${tags}
+${seq}`;
+  document.getElementById('tmpl-title-text').value = title;
+  document.getElementById('tmpl-text').value = text;
+  document.getElementById('tmpl-result').style.display = 'block';
+};
+function buildTags(model) {
+  const num = (model.match(/(\d+)/) || ['',''])[1];
+  return `#iPhone #iPhone${num} #SIMフリー #バッテリー新品 #即発送 #スマートフォン #即購入OK`;
+}
+window.copyTemplate = function() {
+  const text = document.getElementById('tmpl-text').value;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('tmpl-copy-btn');
+    btn.textContent = '✅ コピーしました！';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '📋 説明文をコピーする'; btn.classList.remove('copied'); }, 2500);
+  });
+};
+window.copyTitle = function() {
+  const text = document.getElementById('tmpl-title-text').value;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('tmpl-title-copy-btn');
+    btn.textContent = '✅ コピーしました！';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '📋 タイトルをコピー'; btn.classList.remove('copied'); }, 2500);
+  });
+};
+// ========== ステータス・売却モーダル ==========
+let isSellMode = false;
+function calcModalProfit() {
+  const item = zaikoList.find(r => r.docId === currentDocId);
+  if (!item) return;
+  const sellPrice  = Number(document.getElementById('modal-sell-price').value) || 0;
+  const battery    = Number(document.getElementById('modal-battery').value)    || 0;
+  const frontPanel = Number(document.getElementById('modal-front-panel').value)|| 0;
+  const partsSend  = Number(document.getElementById('modal-parts-sending').value) || 0;
+  const feeEl      = document.getElementById('modal-fee');
+  const fee        = feeEl.value !== '' ? Number(feeEl.value) : (sellPrice > 0 ? Math.ceil(sellPrice * feeRate(document.getElementById('modal-channel').value)) : 0);
+  const shippingEl = document.getElementById('modal-shipping');
+  const shipping   = shippingEl.value !== '' ? Number(shippingEl.value) : 210;
+  const purchase   = item.purchasePrice || 0;
+  const profit     = sellPrice - fee - shipping - purchase - battery - frontPanel - partsSend;
+  const preview    = document.getElementById('modal-profit-preview');
+  const val        = document.getElementById('modal-profit-val');
+  if (sellPrice <= 0) {
+    preview.style.background = '#f8f8f8';
+    val.style.color = '#999';
+    val.textContent = '売却価格を入力してください';
+    return;
+  }
+  const isPos = profit >= 0;
+  preview.style.background = isPos ? '#E8F5E9' : '#FFEBEE';
+  val.style.color = isPos ? '#2E7D32' : '#C62828';
+  const formula = `${sellPrice.toLocaleString()} - ${fee.toLocaleString()}(手数料) - ${shipping.toLocaleString()}(送料) - ${purchase.toLocaleString()}(仕入) - ${battery.toLocaleString()}(BT) - ${frontPanel.toLocaleString()}(FP) - ${partsSend.toLocaleString()}(部品送料)`;
+  document.querySelector('#modal-profit-preview div').textContent = formula;
+  val.textContent = (isPos ? '+' : '') + profit.toLocaleString() + '円';
+}
+window.toggleListingUrlArea = function() {
+  const status = document.getElementById('modal-status').value;
+  document.getElementById('modal-listing-url-area').style.display = status === '出品中' ? 'block' : 'none';
+};
+window.openModal = function(docId, status, sellMode) {
+  currentDocId = docId;
+  isSellMode = sellMode;
+  document.getElementById('modal-title').textContent = sellMode ? '💰 売却処理' : 'ステータス変更';
+  document.getElementById('modal-status').value = status;
+  document.getElementById('modal-status').style.display = sellMode ? 'none' : 'block';
+  document.getElementById('modal-sell-area').style.display = sellMode ? 'block' : 'none';
+  const item = zaikoList.find(r => r.docId === docId);
+  document.getElementById('modal-listing-url').value = (!sellMode && item?.listingUrl) ? item.listingUrl : '';
+  document.getElementById('modal-listing-url-area').style.display = (!sellMode && status === '出品中') ? 'block' : 'none';
+  document.getElementById('modal-sell-price').value = '';
+  document.getElementById('modal-account').value = 'たいれん';
+  document.getElementById('modal-channel').value = 'メルカリ';
+  if (sellMode) {
+    if (item) {
+      document.getElementById('modal-battery').value       = item.battery      || 0;
+      document.getElementById('modal-front-panel').value   = item.frontPanel   || 0;
+      document.getElementById('modal-parts-sending').value = 500;
+      document.getElementById('modal-fee').value           = item.fee > 0 ? item.fee : '';
+      document.getElementById('modal-shipping').value      = 210;
+    }
+    document.getElementById('modal-sell-price').oninput = function() {
+      const sp = Number(this.value);
+      const channel = document.getElementById('modal-channel').value;
+      if (sp > 0 && (channel === 'メルカリ' || channel === 'Yahoo!フリマ')) document.getElementById('modal-fee').value = Math.ceil(sp * feeRate(channel));
+      calcModalProfit();
+    };
+    document.getElementById('modal-channel').onchange = function() {
+      const sp = Number(document.getElementById('modal-sell-price').value);
+      if ((this.value === 'メルカリ' || this.value === 'Yahoo!フリマ') && sp > 0) {
+        document.getElementById('modal-fee').value = Math.ceil(sp * feeRate(this.value));
+        document.getElementById('modal-shipping').value = 210;
+      } else if (this.value === 'ジモティー') {
+        document.getElementById('modal-fee').value = 0;
+        document.getElementById('modal-shipping').value = 0;
+      }
+      calcModalProfit();
+    };
+    ['modal-battery','modal-front-panel','modal-parts-sending','modal-fee','modal-shipping'].forEach(id => {
+      document.getElementById(id).oninput = calcModalProfit;
+    });
+    document.getElementById('modal-profit-preview').style.display = 'block';
+    calcModalProfit();
+  }
+  document.getElementById('statusModal').classList.add('show');
+};
+window.closeModal = function() {
+  document.getElementById('statusModal').classList.remove('show');
+  document.getElementById('modal-profit-preview').style.display = 'none';
+};
+window.applyStatus = async function() {
+  const item = zaikoList.find(r => r.docId === currentDocId);
+  if (!item) return;
+  closeModal();
+  if (isSellMode) {
+    const sellPrice = Number(document.getElementById('modal-sell-price').value);
+    const account   = document.getElementById('modal-account').value;
+    const channel   = document.getElementById('modal-channel').value;
+    if (!sellPrice || sellPrice <= 0) { showToast('⚠️ 売却価格を入力してください'); return; }
+    const battery      = Number(document.getElementById('modal-battery').value)       || 0;
+    const frontPanel   = Number(document.getElementById('modal-front-panel').value)   || 0;
+    const partsSending = Number(document.getElementById('modal-parts-sending').value) || 0;
+    const feeInput     = document.getElementById('modal-fee');
+    const fee          = feeInput.value !== '' ? Number(feeInput.value) : Math.ceil(sellPrice * feeRate(channel));
+    const shippingInput = document.getElementById('modal-shipping');
+    const shipping      = shippingInput.value !== '' ? Number(shippingInput.value) : 210;
+    const partsCost    = battery + frontPanel;
+    const profit       = sellPrice - fee - shipping - item.purchasePrice - partsCost - partsSending;
+    const now          = new Date();
+    await addDoc(collection(db, 'uriage'), {
+      date: now.toISOString().slice(0,10),
+      invId: item.invId, model: item.model, capacity: item.capacity,
+      purchasePrice: item.purchasePrice, partsCost,
+      battery, frontPanel, partsSending,
+      tairenPaid: item.tairenPaid || item.purchasePrice || 0,
+      ryoPaid: item.ryoPaid || partsCost || 0,
+      account, channel, sellPrice, fee, shipping,
+      totalCost: item.purchasePrice + partsCost + partsSending + fee + shipping,
+      profit, profitRate: sellPrice > 0 ? profit/sellPrice : 0,
+      mercariUrl: item.mercariUrl || '',
+      createdAt: now.getTime()
+    });
+    await deleteDoc(doc(db, 'zaiko', currentDocId));
+    showToast('✅ 売却完了！利益 ' + fmt(profit));
+  } else {
+    const newStatus = document.getElementById('modal-status').value;
+    const updateData = {status: newStatus};
+    if (newStatus === '出品中') {
+      const listingUrl = document.getElementById('modal-listing-url').value.trim();
+      if (listingUrl) updateData.listingUrl = listingUrl;
+    }
+    await updateDoc(doc(db, 'zaiko', currentDocId), updateData);
+    showToast('✅ ステータスを「' + newStatus + '」に変更');
+  }
+  loadZaiko();
+};
+// ========== 売上サマリー ==========
+let urageTab = 'summary';
+let uraigeDocIds = [];
+window.loadUriage = async function() {
+  document.getElementById('u-content').innerHTML = '<div class="loading">⏳ 読み込み中...</div>';
+  const snap = await getDocs(query(collection(db, 'uriage'), orderBy('createdAt', 'desc')));
+  const list = [];
+  uraigeDocIds = [];
+  snap.forEach(d => { list.push(d.data()); uraigeDocIds.push({docId: d.id, ...d.data()}); });
+  if (!list.length) {
+    document.getElementById('u-content').innerHTML = '<div class="empty">💰 売上データがありません</div>';
+    return;
+  }
+  renderUriage(list, urageTab);
+};
+function feeRate(channel) { return channel === 'Yahoo!フリマ' ? 0.05 : 0.1; }
+function channelChip(channel) {
+  if (!channel) return '';
+  const cls = channel === 'メルカリ' ? 'channel-mercari' : channel === 'Yahoo!フリマ' ? 'channel-yahoo' : channel === 'ジモティー' ? 'channel-jimoty' : 'channel-other';
+  return `<span class="channel-chip ${cls}">${channel}</span>`;
+}
+function renderUriage(list, tab) {
+  const totalSales  = list.reduce((s,r) => s + r.sellPrice, 0);
+  const totalProfit = list.reduce((s,r) => s + r.profit, 0);
+  const avgRate     = list.reduce((s,r) => s + r.profitRate, 0) / list.length;
+  const tabBar = `<div class="tab-bar">
+    <button class="tab-btn ${tab==='summary'?'active':''}" data-fn="switchUriageTab" data-args='["summary"]'>📊 サマリー</button>
+    <button class="tab-btn ${tab==='monthly'?'active':''}" data-fn="switchUriageTab" data-args='["monthly"]'>📅 月別</button>
+    <button class="tab-btn ${tab==='weekly'?'active':''}"  data-fn="switchUriageTab" data-args='["weekly"]'>📅 週別</button>
+    <button class="tab-btn ${tab==='model'?'active':''}"   data-fn="switchUriageTab" data-args='["model"]'>📱 機種別</button>
+    <button class="tab-btn ${tab==='profit'?'active':''}"  data-fn="switchUriageTab" data-args='["profit"]'>💰 利益額</button>
+    <button class="tab-btn ${tab==='channel'?'active':''}" data-fn="switchUriageTab" data-args='["channel"]'>🏪 販売先</button>
+  </div>`;
+  let body = '';
+  if (tab === 'summary') {
+    const profits = list.map(r => r.profit);
+    body = `<div class="kpi-grid">
+      <div class="kpi-card full highlight"><div class="kpi-num">${fmt(totalProfit)}</div><div class="kpi-lbl">🎯 純利益合計</div></div>
+      <div class="kpi-card"><div class="kpi-num" style="color:#1565C0">${list.length}件</div><div class="kpi-lbl">総売上件数</div></div>
+      <div class="kpi-card"><div class="kpi-num" style="color:#1565C0">${fmt(totalSales)}</div><div class="kpi-lbl">総売上高</div></div>
+      <div class="kpi-card"><div class="kpi-num">${Math.round(avgRate*1000)/10}%</div><div class="kpi-lbl">📈 平均利益率</div></div>
+      <div class="kpi-card"><div class="kpi-num">${fmt(Math.max(...profits))}</div><div class="kpi-lbl">💎 最高利益</div></div>
+      <div class="kpi-card"><div class="kpi-num" style="${Math.min(...profits)<0?'color:#C62828':''}">${fmt(Math.min(...profits))}</div><div class="kpi-lbl">📉 最低利益</div></div>
+    </div>
+    <div style="font-size:14px;font-weight:700;color:#444;margin-bottom:10px">📋 直近の売上履歴</div>
+    ${uraigeDocIds.slice(0,20).map(r => `
+      <div class="item-card" style="border-left-color:#2E7D32">
+        <div class="item-top">
+          <div><div class="item-model">${r.model} ${r.capacity}${channelChip(r.channel)}</div><div class="item-id">${r.date} | ${r.invId}${r.account ? ' | '+r.account : ''}</div></div>
+          <div style="text-align:right">
+            <div class="item-profit ${r.profit<0?'neg':''}">${fmt(r.profit)}</div>
+            <div style="font-size:11px;color:#888">${Math.round(r.profitRate*1000)/10}%</div>
+          </div>
+        </div>
+        <div class="action-row">
+          <button class="action-btn btn-delete" data-fn="openDeleteModal" data-args='["uriage", "${r.docId}", "${r.model} ${r.capacity} (${r.date})"]'>🗑️ 削除</button>
+        </div>
+      </div>`).join('')}`;
+  } else if (tab === 'monthly') {
+    const map = {};
+    list.forEach(r => { const key = r.date?r.date.slice(0,7):'不明'; if(!map[key])map[key]={profit:0,count:0}; map[key].profit+=r.profit;map[key].count++; });
+    const sorted = Object.entries(map).sort((a,b) => b[0].localeCompare(a[0]));
+    body = `<div class="card"><h2>📅 月別利益</h2>${sorted.map(([month,d])=>`
+      <div class="period-row">
+        <div><div class="period-label">${month}</div><div class="period-sub">${d.count}件</div></div>
+        <div class="period-right"><div class="period-profit">${fmt(d.profit)}</div><div class="period-count">平均 ${fmt(d.profit/d.count)}/件</div></div>
+      </div>`).join('')}</div>`;
+  } else if (tab === 'weekly') {
+    const map = {};
+    list.forEach(r => {
+      if(!r.date)return; const d=new Date(r.date); const day=d.getDay();
+      const monday=new Date(d); monday.setDate(d.getDate()-(day===0?6:day-1));
+      const key=monday.toISOString().slice(0,10);
+      if(!map[key])map[key]={profit:0,count:0,end:''};
+      map[key].profit+=r.profit;map[key].count++;
+      const sunday=new Date(monday);sunday.setDate(monday.getDate()+6);
+      map[key].end=sunday.toISOString().slice(0,10);
+    });
+    const sorted=Object.entries(map).sort((a,b)=>b[0].localeCompare(a[0]));
+    body=`<div class="card"><h2>📅 週別利益</h2>${sorted.map(([start,d])=>`
+      <div class="period-row">
+        <div><div class="period-label">${start} 〜</div><div class="period-sub">${d.end} (${d.count}件)</div></div>
+        <div class="period-right"><div class="period-profit">${fmt(d.profit)}</div><div class="period-count">平均 ${fmt(d.profit/d.count)}/件</div></div>
+      </div>`).join('')}</div>`;
+  } else if (tab === 'model') {
+    const map={};
+    list.forEach(r=>{if(!map[r.model])map[r.model]={profit:0,count:0};map[r.model].profit+=r.profit;map[r.model].count++;});
+    const sorted=Object.entries(map).sort((a,b)=>b[1].count-a[1].count);
+    const medals=['gold','silver','bronze'];
+    body=`<div class="card"><h2>📱 機種別ランキング（件数順）</h2>${sorted.map(([model,d],i)=>`
+      <div class="rank-row">
+        <div class="rank-num ${medals[i]||''}">${i+1}</div>
+        <div class="rank-label"><div style="font-weight:600">${model}</div><div style="font-size:11px;color:#888">${d.count}件 / 平均 ${fmt(d.profit/d.count)}</div></div>
+        <div class="rank-val">${fmt(d.profit)}</div>
+      </div>`).join('')}</div>`;
+  } else if (tab === 'profit') {
+    const map={};
+    list.forEach(r=>{if(!map[r.model])map[r.model]={profit:0,count:0};map[r.model].profit+=r.profit;map[r.model].count++;});
+    const sorted=Object.entries(map).sort((a,b)=>b[1].profit-a[1].profit);
+    const medals=['gold','silver','bronze'];
+    body=`<div class="card"><h2>💰 利益額ランキング（機種別）</h2>${sorted.map(([model,d],i)=>`
+      <div class="rank-row">
+        <div class="rank-num ${medals[i]||''}">${i+1}</div>
+        <div class="rank-label"><div style="font-weight:600">${model}</div><div style="font-size:11px;color:#888">${d.count}件 / 平均 ${fmt(d.profit/d.count)}</div></div>
+        <div class="rank-val">${fmt(d.profit)}</div>
+      </div>`).join('')}</div>`;
+  } else if (tab === 'channel') {
+    const map={};
+    list.forEach(r=>{const ch=r.channel||'不明';if(!map[ch])map[ch]={profit:0,count:0,sales:0};map[ch].profit+=r.profit;map[ch].count++;map[ch].sales+=r.sellPrice;});
+    const sorted=Object.entries(map).sort((a,b)=>b[1].count-a[1].count);
+    body=`<div class="card"><h2>🏪 販売先別集計</h2>${sorted.map(([ch,d])=>`
+      <div class="rank-row">
+        <div class="rank-label"><div style="font-weight:600">${ch}</div><div style="font-size:11px;color:#888">${d.count}件 / 売上 ${fmt(d.sales)}</div></div>
+        <div class="rank-val">${fmt(d.profit)}</div>
+      </div>`).join('')}</div>`;
+  }
+  document.getElementById('u-content').innerHTML = tabBar + body;
+  window._uraigeList = list;
+}
+window.switchUriageTab = function(tab) {
+  urageTab = tab;
+  if (window._uraigeList) renderUriage(window._uraigeList, tab);
+};
+// ========== ユーティリティ ==========
+function fmt(n) { return '¥' + Math.round(n).toLocaleString(); }
+window.showToast = function(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+};
+</script>
+</body>
+</html>

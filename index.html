@@ -420,9 +420,9 @@ function soubaMeta(s) {
 }
 window.openSouba = function() {
   const groups = {};
-  // 現在の仕入れ対象(13/14/15無印の128〜512GB、13 Pro Maxの128/256GB)だけを表示する。
+  // 現在の仕入れ対象(13/14/15無印の128〜512GB、13 Pro Max・13 Pro・14 Proの128/256GB)だけを表示する。
   // 対象を増やしたらここのリストも足すこと(Firestoreのデータ自体は消していない)。
-  const targets = {'iPhone 13': ['128GB','256GB','512GB'], 'iPhone 14': ['128GB','256GB','512GB'], 'iPhone 15': ['128GB','256GB','512GB'], 'iPhone 13 Pro Max': ['128GB','256GB']};
+  const targets = {'iPhone 13': ['128GB','256GB','512GB'], 'iPhone 14': ['128GB','256GB','512GB'], 'iPhone 15': ['128GB','256GB','512GB'], 'iPhone 13 Pro Max': ['128GB','256GB'], 'iPhone 13 Pro': ['128GB','256GB'], 'iPhone 14 Pro': ['128GB','256GB']};
   soubaData.filter(s => (targets[s.model] || []).includes(s.capacity)).forEach(s => { (groups[s.model] = groups[s.model] || []).push(s); });
   const capNum = c => parseInt(c) || 0;
   const modelNum = m => parseInt((m.match(/\d+/) || [0])[0]);

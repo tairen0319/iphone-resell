@@ -419,6 +419,20 @@ select:focus,input:focus,textarea:focus{border-color:var(--accent);background-co
     </div>
   </div>
 </div>
+<div class="overlay" id="priceModal">
+  <div class="sheet">
+    <h3>出品価格を変更</h3>
+    <label for="price-input">メルカリの値段(円)</label>
+    <input type="number" id="price-input" inputmode="numeric" placeholder="例: 45000">
+    <label for="price-input-y">Yahoo!フリマの値段(円)</label>
+    <input type="number" id="price-input-y" inputmode="numeric" placeholder="空欄ならメルカリと同じ">
+    <div class="d-hint">メルカリ・Yahoo!フリマ本体の値段は自分で直してください。ここはアプリの表示と利益計算だけ変わります。</div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" data-fn="closePriceModal">キャンセル</button>
+      <button class="btn btn-primary" data-fn="savePrice">保存</button>
+    </div>
+  </div>
+</div>
 <!-- 出品テンプレ -->
 <div class="overlay" id="templateModal">
   <div class="sheet">
@@ -614,7 +628,8 @@ const VIEW_ICONS = {
 };
 let detailDocId = null;
 
-function listPriceOf(r) { return Number(r.listPrice) || 0; }
+function listPriceOf(r) { return Number(r.listPrice) || 0; }   // メルカリの出品価格(スキルが書く値)
+function listPriceYOf(r) { return Number(r.listPriceY) || listPriceOf(r); }   // Yahoo!フリマの出品価格。未設定ならメルカリと同じ
 function nowSouba(r) {
   const f = soubaData.find(s => s.model === r.model && s.capacity === r.capacity);
   return Number(f?.souba) || Number(r.souba) || 0;
@@ -636,8 +651,8 @@ function stockDays(r) {
   const days = daysSince(listed ? r.listedAt : r.date);
   return { days, label: listed ? '出品から' : '仕入れから', cls: days >= 30 ? 'danger' : days >= 14 ? 'warn' : '' };
 }
-function profitCells(price, r, extraCls) {
-  const m = profitAt(price, r, 'メルカリ'), y = profitAt(price, r, 'Yahoo!フリマ');
+function profitCells(price, r, extraCls, priceY) {
+  const m = profitAt(price, r, 'メルカリ'), y = profitAt(priceY || price, r, 'Yahoo!フリマ');
   return `<div class="pf-row ${extraCls || ''}">
     <div class="pf"><span class="pf-ch">メルカリ</span><span class="pf-v ${m < 0 ? 'neg' : ''}">${signedYen(m)}</span></div>
     <div class="pf"><span class="pf-ch">Yahoo!</span><span class="pf-v ${y < 0 ? 'neg' : ''}">${signedYen(y)}</span></div>
@@ -679,8 +694,8 @@ function headHtml(r, trailing) {
 function priceBlockHtml(r) {
   const price = listPriceOf(r), souba = nowSouba(r);
   if (price > 0) {
-    return `<div class="lc-main"><div><div class="lbl">出品価格</div><div class="lc-price">${fmt(price)}</div></div>${gapHtml(price, souba)}</div>
-      ${souba ? meterHtml(r, price, souba) : ''}${profitCells(price, r)}${notesHtml(r)}`;
+    return `<div class="lc-main"><div><div class="lbl">出品価格</div><div class="lc-price">${fmt(price)}</div>${listPriceYOf(r) !== price ? `<div class="lbl">Yahoo!フリマ ${fmt(listPriceYOf(r))}</div>` : ''}</div>${gapHtml(price, souba)}</div>
+      ${souba ? meterHtml(r, price, souba) : ''}${profitCells(price, r, '', listPriceYOf(r))}${notesHtml(r)}`;
   }
   const cand = souba ? priceCandidates(souba)[0] : 0;
   return `<div class="lc-main"><div><div class="lbl">出品価格</div><div class="lc-price none">まだ決めていません</div></div>
@@ -743,7 +758,7 @@ function renderHome() {
   });
   if (!groups[homeFilter]) homeFilter = 'all';
   const sumM = priced.reduce((s, r) => s + profitAt(listPriceOf(r), r, 'メルカリ'), 0);
-  const sumY = priced.reduce((s, r) => s + profitAt(listPriceOf(r), r, 'Yahoo!フリマ'), 0);
+  const sumY = priced.reduce((s, r) => s + profitAt(listPriceYOf(r), r, 'Yahoo!フリマ'), 0);
   const avgDays = Math.round(list.reduce((s, r) => s + daysSince(r.date), 0) / list.length);
   const hero = `<div class="hero">
     <div class="hero-lbl">見込み利益<span>${priced.length ? `値段を決めた${priced.length}台がぜんぶ売れたら` : '値段を決めた在庫がまだありません'}</span></div>
@@ -796,6 +811,7 @@ window.detailAction = function(action) {
   if (action === 'status')   openModal(r.docId, r.status, false);
   if (action === 'template') openTemplateModal(r.docId);
   if (action === 'memo')     openMemoModal(r.docId);
+  if (action === 'price')    openPriceModal(r.docId);
   if (action === 'delete')   openDeleteModal('zaiko', r.docId, `${r.invId || ''} ${r.model} ${r.capacity}`.trim());
 };
 window.copyText = function(text) {
@@ -839,10 +855,10 @@ function detailHtml(r) {
   const sim = simPrices.length ? `<div class="d-sec"><h4>${price > 0 ? '値下げしたら' : '値段の候補'}</h4>
     <div class="sim"><span class="h">値段</span><span class="h">メルカリ</span><span class="h">Yahoo!</span>
     ${simPrices.map((p, i) => {
-      const m = profitAt(p, r, 'メルカリ'), y = profitAt(p, r, 'Yahoo!フリマ');
+      const m = profitAt(p, r, 'メルカリ'), y = profitAt(price > 0 && i === 0 ? listPriceYOf(r) : p, r, 'Yahoo!フリマ');
       return `<span>${fmt(p)}${price > 0 && i === 0 ? '<small>今の値段</small>' : ''}</span><b class="${m < 0 ? 'neg' : ''}">${signedYen(m)}</b><b class="${y < 0 ? 'neg' : ''}">${signedYen(y)}</b>`;
     }).join('')}</div>
-    <div class="d-hint">${price > 0 ? '値段を変えるときは、Claudeに頼むとメルカリ・Yahoo!フリマとこのアプリをまとめて直せます。' : '写真をClaudeに送るときに、この候補から値段を選べます。'}</div></div>` : '';
+    <div class="d-hint">${price > 0 ? '値段は下の「出品価格を変更」で直せます(メルカリ・Yahoo!フリマ側は自分で直してください)。' : '写真をClaudeに送るときに、この候補から値段を選べます。'}</div></div>` : '';
   const feeRows = price > 0 ? `
     <div class="row"><span>手数料(メルカリ10%)</span><b>${fmt(Math.ceil(price * 0.1))}</b></div>
     <div class="row"><span>手数料(Yahoo! 5%)</span><b>${fmt(Math.ceil(price * 0.05))}</b></div>` : '';
@@ -863,12 +879,35 @@ function detailHtml(r) {
     ${r.listingUrl ? `<div class="row"><span>出品ページ</span><b>${link(r.listingUrl, '開く')}</b></div>` : ''}</div>`;
   const acts = [];
   if (next) acts.push(['sell', '売れたので記録する']);
-  acts.push(['status', 'ステータス変更'], ['template', '出品テンプレ'], ['memo', 'メモ']);
+  acts.push(['price', '出品価格を変更'], ['status', 'ステータス変更'], ['template', '出品テンプレ'], ['memo', 'メモ']);
   const actions = `<div class="actions">${acts.map(([k, l]) => `<button class="act" data-fn="detailAction" data-args='["${k}"]'>${l}</button>`).join('')}
     <button class="act danger" data-fn="detailAction" data-args='["delete"]'>${TRASH_ICON}削除</button></div>`;
   return headHtml(r, '<button class="d-close" data-fn="closeDetail" aria-label="閉じる">×</button>')
     + stepsHtml(r) + nextBtn + priceBlockHtml(r) + sim + cost + info + actions;
 }
+// ========== 出品価格モーダル ==========
+let priceDocId = null;
+window.openPriceModal = function(docId) {
+  priceDocId = docId;
+  const item = zaikoList.find(r => r.docId === docId);
+  document.getElementById('price-input').value = item && listPriceOf(item) > 0 ? listPriceOf(item) : '';
+  document.getElementById('price-input-y').value = item && Number(item.listPriceY) > 0 ? item.listPriceY : '';
+  document.getElementById('priceModal').classList.add('show');
+};
+window.closePriceModal = function() {
+  document.getElementById('priceModal').classList.remove('show');
+};
+window.savePrice = async function() {
+  if (!priceDocId) return;
+  const v = Number(document.getElementById('price-input').value);
+  const vy = Number(document.getElementById('price-input-y').value);
+  if (!(v >= 0) || !(vy >= 0)) { showToast('金額を入れてください'); return; }
+  // Yahoo!が空欄・メルカリと同額なら listPriceY は 0(=メルカリと同じ)にして、スキルが listPrice だけ書き換えても揃うようにする
+  await updateDoc(doc(db, 'zaiko', priceDocId), { listPrice: Math.round(v), listPriceY: vy > 0 && Math.round(vy) !== Math.round(v) ? Math.round(vy) : 0 });
+  closePriceModal();
+  showToast('✅ 出品価格を保存しました');
+  loadZaiko();
+};
 // ========== メモ編集モーダル ==========
 window.openMemoModal = function(docId) {
   memoDocId = docId;

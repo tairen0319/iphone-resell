@@ -253,7 +253,8 @@ a{color:var(--accent);}
 .sim > *:nth-last-child(-n+3){border-bottom:none;}
 .sim .h{font-size:11px;color:var(--muted);font-weight:700;padding:4px 0 6px;}
 .sim b{font-weight:800;}
-.sim small{display:block;font-size:10.5px;color:var(--muted);font-weight:600;}
+.sim small{display:block;font-size:10.5px;color:var(--muted);font-weight:600;margin-top:2px;}
+.sim-c b{display:block;}
 .d-hint{font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.6;}
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:22px;}
 .act{padding:13px;border-radius:14px;border:1px solid var(--line);background:var(--surface);font-weight:700;font-size:14px;display:flex;gap:8px;align-items:center;justify-content:center;cursor:pointer;}
@@ -851,14 +852,23 @@ function detailHtml(r) {
   const nextBtn = next
     ? `<button class="next-btn" data-fn="advanceStatus">${next.label}</button>`
     : `<button class="next-btn" data-fn="detailAction" data-args='["sell"]'>売れたので記録する</button>`;
-  const simPrices = price > 0 ? [price, price - 1000, price - 2000, price - 3000] : (souba ? priceCandidates(souba) : []);
-  const sim = simPrices.length ? `<div class="d-sec"><h4>${price > 0 ? '値下げしたら' : '値段の候補'}</h4>
+  // 値段が決まっていれば「今の値段から○円下げたら」の利益を、まだなら相場からの値段候補を出す。
+  // 各セルは「利益」と「その時の値段」。メルカリとYahoo!で値段が違う時はそれぞれの値段から下げる。
+  const priceY = listPriceYOf(r);
+  const cell = (p, ch) => { const v = profitAt(p, r, ch); return `<span class="sim-c"><b class="${v < 0 ? 'neg' : ''}">${signedYen(v)}</b><small>${fmt(p)}で売れたら</small></span>`; };
+  let sim = '';
+  if (price > 0) {
+    sim = `<div class="d-sec"><h4>値下げしたら、利益はいくら?</h4>
+    <div class="sim"><span class="h">下げる額</span><span class="h">メルカリ</span><span class="h">Yahoo!</span>
+    ${[1000, 2000, 3000].map(c => `<span>${c.toLocaleString()}円下げ</span>${cell(price - c, 'メルカリ')}${cell(priceY - c, 'Yahoo!フリマ')}`).join('')}</div>
+    <div class="d-hint">今の値段(メルカリ ${fmt(price)}${priceY !== price ? `・Yahoo! ${fmt(priceY)}` : ''})から下げた場合です。値段を変えたら、下の「出品価格を変更」でアプリにも入れてください(メルカリ・Yahoo!フリマ側は自分で直してください)。</div></div>`;
+  } else if (souba) {
+    sim = `<div class="d-sec"><h4>値段の候補</h4>
     <div class="sim"><span class="h">値段</span><span class="h">メルカリ</span><span class="h">Yahoo!</span>
-    ${simPrices.map((p, i) => {
-      const m = profitAt(p, r, 'メルカリ'), y = profitAt(price > 0 && i === 0 ? listPriceYOf(r) : p, r, 'Yahoo!フリマ');
-      return `<span>${fmt(p)}${price > 0 && i === 0 ? '<small>今の値段</small>' : ''}</span><b class="${m < 0 ? 'neg' : ''}">${signedYen(m)}</b><b class="${y < 0 ? 'neg' : ''}">${signedYen(y)}</b>`;
-    }).join('')}</div>
-    <div class="d-hint">${price > 0 ? '値段は下の「出品価格を変更」で直せます(メルカリ・Yahoo!フリマ側は自分で直してください)。' : '写真をClaudeに送るときに、この候補から値段を選べます。'}</div></div>` : '';
+    ${priceCandidates(souba).map(p => { const m = profitAt(p, r, 'メルカリ'), y = profitAt(p, r, 'Yahoo!フリマ');
+      return `<span>${fmt(p)}</span><b class="${m < 0 ? 'neg' : ''}">${signedYen(m)}</b><b class="${y < 0 ? 'neg' : ''}">${signedYen(y)}</b>`; }).join('')}</div>
+    <div class="d-hint">写真をClaudeに送るときに、この候補から値段を選べます。</div></div>`;
+  }
   const feeRows = price > 0 ? `
     <div class="row"><span>手数料(メルカリ10%)</span><b>${fmt(Math.ceil(price * 0.1))}</b></div>
     <div class="row"><span>手数料(Yahoo! 5%)</span><b>${fmt(Math.ceil(price * 0.05))}</b></div>` : '';

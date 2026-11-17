@@ -27,6 +27,7 @@
   --skel-a:#e9ebf0;--skel-b:#f4f5f8;
   --bar-bg:rgba(243,244,247,.88);--tab-bg:rgba(255,255,255,.93);
   --toast-bg:rgba(18,20,28,.92);--toast-ink:#fff;
+  --listed-bg:#f1f6ff;--listed-line:#c5d6fb;
   --st1-bg:#f1e7f8;--st1-ink:#6a1b9a;--st2-bg:#dff3ef;--st2-ink:#00695c;--st4-bg:#fdebdc;--st4-ink:#b24a00;
   --r:16px;
   --shadow:0 1px 2px rgba(18,20,28,.04),0 4px 16px rgba(18,20,28,.06);
@@ -45,6 +46,7 @@
     --skel-a:#1d2029;--skel-b:#272b37;
     --bar-bg:rgba(14,16,21,.86);--tab-bg:rgba(25,28,36,.94);
     --toast-bg:rgba(241,242,246,.96);--toast-ink:#12141c;
+    --listed-bg:#182138;--listed-line:#2f4374;
     --st1-bg:#3a2447;--st1-ink:#dcaef0;--st2-bg:#143a35;--st2-ink:#7fd6c8;--st4-bg:#45290f;--st4-ink:#f5b27a;
     --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.28);
   }
@@ -151,7 +153,7 @@ a{color:var(--accent);}
 .hero-alert i{font-style:normal;opacity:.85;white-space:nowrap;}
 
 /* コンパクト表示(1台1行) */
-.cl{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:2px 14px;margin-bottom:10px;}
+.cl{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:0 14px;margin-bottom:10px;overflow:hidden;}
 .cr{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line);cursor:pointer;}
 .cr:last-child{border-bottom:none;}
 .cr .lc-no{width:32px;height:32px;font-size:13px;border-radius:10px;}
@@ -172,6 +174,12 @@ a{color:var(--accent);}
 .next-btn:active{transform:scale(.985);}
 .copy{border:none;background:var(--surface-2);border-radius:8px;padding:3px 9px;font-size:11.5px;font-weight:700;color:var(--ink-2);margin-left:8px;cursor:pointer;}
 .stock-tag{display:block;font-size:10.5px;color:var(--accent-ink);font-weight:700;}
+
+/* 出品中の在庫: 全体に色 */
+.lc.is-listed{background:var(--listed-bg);box-shadow:inset 0 0 0 1.5px var(--listed-line),var(--shadow);}
+.lc.is-listed .pf,.lc.is-listed .lc-no,.cr.is-listed .lc-no{background:var(--surface);}
+.lc.is-listed .pf-row.cand .pf{background:transparent;}
+.cr.is-listed{background:var(--listed-bg);margin:0 -14px;padding-left:14px;padding-right:14px;box-shadow:inset 3px 0 0 var(--accent);}
 
 /* 共通カード・行 */
 .card{background:var(--surface);border-radius:var(--r);padding:4px 16px;margin-bottom:12px;box-shadow:var(--shadow);}
@@ -683,7 +691,7 @@ function rowHtml(r) {
   const price = listPriceOf(r), souba = nowSouba(r), d = stockDays(r);
   const p = price || (souba ? priceCandidates(souba)[0] : 0);
   const pm = p > 0 ? profitAt(p, r, 'メルカリ') : null;
-  return `<div class="cr" role="button" tabindex="0" data-fn="openDetail" data-args='["${esc(r.docId)}"]'>
+  return `<div class="cr${r.status === '出品中' ? ' is-listed' : ''}" role="button" tabindex="0" data-fn="openDetail" data-args='["${esc(r.docId)}"]'>
     <span class="lc-no">${esc(r.invId || '–')}</span>
     <div class="cr-main"><div class="lc-model">${esc(r.model)} <span>${esc(r.capacity)}</span></div>
       <div class="lc-sub">${esc(r.status || '–')} ・<span class="days ${d.cls}" title="${d.label}${d.days}日">${d.days}日</span>${checkReasons(r).length ? '<span class="cr-warn">⚠ 要チェック</span>' : ''}</div></div>
@@ -692,7 +700,7 @@ function rowHtml(r) {
   </div>`;
 }
 function cardHtml(r) {
-  return `<div class="lc" role="button" tabindex="0" data-fn="openDetail" data-args='["${esc(r.docId)}"]'>${headHtml(r)}${priceBlockHtml(r)}</div>`;
+  return `<div class="lc${r.status === '出品中' ? ' is-listed' : ''}" role="button" tabindex="0" data-fn="openDetail" data-args='["${esc(r.docId)}"]'>${headHtml(r)}${priceBlockHtml(r)}</div>`;
 }
 
 window.loadZaiko = async function() {

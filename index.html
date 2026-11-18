@@ -284,6 +284,9 @@ select:focus,input:focus,textarea:focus{border-color:var(--accent);background-co
 .fieldset select,.fieldset input{background-color:var(--surface);}
 .fieldset-t{font-size:12px;font-weight:700;color:var(--ink-2);padding-top:12px;}
 .out-title{font-weight:700;background:var(--accent-weak);border-color:transparent;resize:none;font-size:14px;line-height:1.6;}
+.rank-row{display:flex;gap:6px;margin:4px 0 6px;}
+.rank-row .chip{padding:6px 14px;}
+.rank-hint{font-size:11.5px;color:var(--muted);margin:-2px 0 8px;}
 .out-text{height:240px;font-size:12.5px;line-height:1.7;resize:none;}
 .section-label{font-size:12px;font-weight:700;color:var(--muted);margin:16px 0 6px;letter-spacing:.03em;}
 
@@ -441,13 +444,18 @@ select:focus,input:focus,textarea:focus{border-color:var(--accent);background-co
     <input type="text" id="tmpl-color" placeholder="例：スターライト、ブラック、レッド">
     <label for="tmpl-imei">IMEI</label>
     <input type="text" id="tmpl-imei" placeholder="例：354123456789012" inputmode="numeric">
+    <div class="rank-hint">ランク S＝極美品(傷ほぼなし) / A＝美品(小傷が少し) / B＝良品(傷・使用感あり)。全体のランクは一番低い所に合わせます。</div>
     <label for="tmpl-screen">画面の状態</label>
+    <div class="rank-row" id="rank-screen"><button type="button" class="chip" data-fn="setPartRank" data-args='["screen","S"]'>S</button><button type="button" class="chip" data-fn="setPartRank" data-args='["screen","A"]'>A</button><button type="button" class="chip" data-fn="setPartRank" data-args='["screen","B"]'>B</button></div>
     <input type="text" id="tmpl-screen" placeholder="例：新品交換済み / 割れなし・傷なし">
     <label for="tmpl-back">背面の状態</label>
+    <div class="rank-row" id="rank-back"><button type="button" class="chip" data-fn="setPartRank" data-args='["back","S"]'>S</button><button type="button" class="chip" data-fn="setPartRank" data-args='["back","A"]'>A</button><button type="button" class="chip" data-fn="setPartRank" data-args='["back","B"]'>B</button></div>
     <input type="text" id="tmpl-back" placeholder="例：細かいすり傷あり">
     <label for="tmpl-side">側面の状態</label>
+    <div class="rank-row" id="rank-side"><button type="button" class="chip" data-fn="setPartRank" data-args='["side","S"]'>S</button><button type="button" class="chip" data-fn="setPartRank" data-args='["side","A"]'>A</button><button type="button" class="chip" data-fn="setPartRank" data-args='["side","B"]'>B</button></div>
     <input type="text" id="tmpl-side" placeholder="例：傷なし">
     <label for="tmpl-camera">カメラ周りの状態</label>
+    <div class="rank-row" id="rank-camera"><button type="button" class="chip" data-fn="setPartRank" data-args='["camera","S"]'>S</button><button type="button" class="chip" data-fn="setPartRank" data-args='["camera","A"]'>A</button><button type="button" class="chip" data-fn="setPartRank" data-args='["camera","B"]'>B</button></div>
     <input type="text" id="tmpl-camera" placeholder="例：傷なし">
     <button class="btn btn-accent" data-fn="generateTemplate" style="margin-top:16px">タイトルと説明文を作る</button>
     <div id="tmpl-result" style="display:none">
@@ -978,12 +986,25 @@ window.openTemplateModal = function(docId) {
   document.getElementById('tmpl-back').value   = '';
   document.getElementById('tmpl-side').value   = '';
   document.getElementById('tmpl-camera').value = '';
+  partRanks = { screen: templateItem.frontPanel > 0 ? 'S' : '' };
+  paintRanks();
   document.getElementById('tmpl-result').style.display = 'none';
   document.getElementById('tmpl-copy-btn').textContent = '📋 説明文をコピーする';
   document.getElementById('tmpl-copy-btn').classList.remove('copied');
   document.getElementById('tmpl-title-copy-btn').textContent = '📋 タイトルをコピー';
   document.getElementById('tmpl-title-copy-btn').classList.remove('copied');
   document.getElementById('templateModal').classList.add('show');
+};
+const RANK_NAME = { S: '極美品', A: '美品', B: '良品' };
+let partRanks = {};
+function paintRanks() {
+  ['screen', 'back', 'side', 'camera'].forEach(k => {
+    document.querySelectorAll(`#rank-${k} .chip`).forEach(b => b.classList.toggle('active', b.textContent === partRanks[k]));
+  });
+}
+window.setPartRank = function(part, rank) {
+  partRanks[part] = partRanks[part] === rank ? '' : rank;
+  paintRanks();
 };
 window.closeTemplateModal = function() {
   document.getElementById('templateModal').classList.remove('show');
@@ -999,7 +1020,11 @@ window.generateTemplate = function() {
   const model    = templateItem.model;
   const capacity = templateItem.capacity;
   const seq      = templateItem.invId || '';
-  const title = `${model} ${capacity} 新品バッテリー100%${color ? ' ' + color : ''}`;
+  const keys = ['screen', 'back', 'side', 'camera'];
+  if (keys.some(k => !partRanks[k])) { showToast('画面・背面・側面・カメラのランクを全部選んでください'); return; }
+  const overall = keys.map(k => partRanks[k]).sort((a, b) => 'SAB'.indexOf(b) - 'SAB'.indexOf(a))[0];
+  const rk = k => partRanks[k] + '　';
+  const title = `【${overall} ${RANK_NAME[overall]}】${model} ${capacity} 新品バッテリー100%${color ? ' ' + color : ''}`;
   const colorLine = color ? `・カラー　：${color}\n` : '';
   const tags = buildTags(model);
   const text =
@@ -1018,13 +1043,19 @@ ${colorLine}・容量　　：${capacity}
 ・アクティベーションロック：解除済
 ・初期化　：全て初期化済
 ・IMEI　：${imei}
+・付属品　：本体のみ／SIMピン（おまけ）
 
-■ 商品状態
-・画面　　　：${screenState}
-・背面　　　：${backState}
-・側面　　　：${sideState}
-・カメラ周り：${cameraState}
+■ 商品状態　外装ランク：${overall}（${RANK_NAME[overall]}）
+・画面　　　：${rk('screen')}${screenState}
+・背面　　　：${rk('back')}${backState}
+・側面　　　：${rk('side')}${sideState}
+・カメラ周り：${rk('camera')}${cameraState}
 ・バッテリー：新品交換済・最大容量100%！！
+
+■ 外装ランクの基準
+S（極美品）：傷がほぼなく、とてもきれい
+A（美品）　：小さな傷が少しあるが、全体的にきれい
+B（良品）　：傷や使用感があるが、使用に問題なし
 
 ◽️動作確認
 起動・充電・カメラ・各種ボタン・電波・液晶・タッチパネル・Face ID全て確認済み

@@ -1118,8 +1118,15 @@ window.openModal = function(docId, status, sellMode) {
       if (sp > 0 && (channel === 'メルカリ' || channel === 'Yahoo!フリマ')) document.getElementById('modal-fee').value = Math.ceil(sp * feeRate(channel));
       calcModalProfit();
     };
+    // 販売先を選ぶと、売却価格をその販売先の出品価格に入れ直す。
+    // ただし自分で打ち直した金額はそのまま残す(自動で入れた金額か空欄の時だけ入れ替える)。
+    const spEl = document.getElementById('modal-sell-price');
+    let autoPrice = '';
+    const listFor = ch => !item ? 0 : ch === 'Yahoo!フリマ' ? listPriceYOf(item) : ch === 'メルカリ' ? listPriceOf(item) : 0;
     document.getElementById('modal-channel').onchange = function() {
-      const sp = Number(document.getElementById('modal-sell-price').value);
+      const lp = listFor(this.value);
+      if (lp > 0 && (spEl.value === '' || spEl.value === autoPrice)) { spEl.value = String(lp); autoPrice = spEl.value; }
+      const sp = Number(spEl.value);
       if ((this.value === 'メルカリ' || this.value === 'Yahoo!フリマ') && sp > 0) {
         document.getElementById('modal-fee').value = Math.ceil(sp * feeRate(this.value));
         document.getElementById('modal-shipping').value = 210;
@@ -1133,7 +1140,7 @@ window.openModal = function(docId, status, sellMode) {
       document.getElementById(id).oninput = calcModalProfit;
     });
     document.getElementById('modal-profit-preview').style.display = 'block';
-    if (item && Number(item.listPrice) > 0) { const sp = document.getElementById('modal-sell-price'); sp.value = item.listPrice; sp.oninput(); }
+    if (listFor('メルカリ') > 0) { spEl.value = String(listFor('メルカリ')); autoPrice = spEl.value; spEl.oninput(); }
     calcModalProfit();
   }
   document.getElementById('statusModal').classList.add('show');

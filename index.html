@@ -146,11 +146,14 @@ a{color:var(--accent);}
 .note{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;border-radius:8px;padding:4px 9px;margin:8px 6px 0 0;}
 .note.warn{background:var(--warn-weak);color:var(--warn-ink);}
 .note.crit{background:var(--crit-weak);color:var(--crit-ink);}
+.note:not(.warn):not(.crit):not(.ok){background:var(--chip-bg);color:var(--ink-2);}
+.note.ok{background:var(--good-weak);color:var(--good-ink);}
 
 .hero-sub{font-size:12px;color:rgba(255,255,255,.72);margin-top:4px;}
 .hero-alert{display:flex;align-items:center;gap:8px;width:100%;margin-top:14px;padding:10px 12px;border:none;border-radius:12px;background:rgba(250,178,25,.16);color:#ffd98c;font-size:12.5px;font-weight:700;cursor:pointer;text-align:left;}
 .hero-alert span{flex:1;}
 .hero-alert i{font-style:normal;opacity:.85;white-space:nowrap;}
+.hero-alert.ok{background:rgba(52,199,89,.18);color:#a6efb9;}
 
 /* コンパクト表示(1台1行) */
 .cl{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:0 14px;margin-bottom:10px;overflow:hidden;}
@@ -163,6 +166,7 @@ a{color:var(--accent);}
 .cr-price.none{color:var(--muted);font-weight:700;font-size:12.5px;}
 .cr-pf{font-size:11.5px;color:var(--ink-2);font-weight:700;}
 .cr-warn{margin-left:6px;color:var(--warn-ink);font-weight:800;}
+.cr-ok{margin-left:6px;color:var(--good-ink);font-weight:800;}
 
 /* 進み具合と「次へ」 */
 .steps{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:16px;}
@@ -366,11 +370,6 @@ select:focus,input:focus,textarea:focus{border-color:var(--accent);background-co
         <option value="Yahoo!フリマ">Yahoo!フリマ</option>
         <option value="ジモティー">ジモティー</option>
         <option value="その他">その他</option>
-      </select>
-      <label for="modal-account">出品アカウント</label>
-      <select id="modal-account">
-        <option value="たいれん">たいれん</option>
-        <option value="りょう">りょう</option>
       </select>
       <div class="fieldset">
         <div class="fieldset-t">経費を確認・変更</div>
@@ -631,6 +630,9 @@ let detailDocId = null;
 
 function listPriceOf(r) { return Number(r.listPrice) || 0; }   // メルカリの出品価格(スキルが書く値)
 function listPriceYOf(r) { return Number(r.listPriceY) || listPriceOf(r); }   // Yahoo!フリマの出品価格。未設定ならメルカリと同じ
+// 売れた値段・販売先(見回りスキル iphone-sales-patrol が「発送中」にする時に書く)。tradeDone は相手の受け取り評価まで済んだ印
+function soldPriceOf(r) { return Number(r.soldPrice) || 0; }
+function isSoldWaiting(r) { return r.status === '発送中' && soldPriceOf(r) > 0; }
 function nowSouba(r) {
   const f = soubaData.find(s => s.model === r.model && s.capacity === r.capacity);
   return Number(f?.souba) || Number(r.souba) || 0;
@@ -668,6 +670,7 @@ function meterHtml(r, price, souba) {
 }
 // 見直したほうがいい理由を集める(カードの注意書き・「要チェック」の絞り込みで共通に使う)
 function checkReasons(r) {
+  if (r.status === '発送中') return [];
   const price = listPriceOf(r), souba = nowSouba(r), out = [];
   if (price > 0) {
     const pm = profitAt(price, r, 'メルカリ');
@@ -693,6 +696,12 @@ function headHtml(r, trailing) {
     <span class="badge badge-${esc(r.status)}">${esc(r.status || '–')}</span>${trailing || ''}</div>`;
 }
 function priceBlockHtml(r) {
+  if (isSoldWaiting(r)) {
+    const sp = soldPriceOf(r), ch = r.soldChannel || 'メルカリ', pf = profitAt(sp, r, ch);
+    return `<div class="lc-main"><div><div class="lbl">売れた値段${channelChip(ch)}</div><div class="lc-price">${fmt(sp)}</div></div>
+      <div class="lc-gap"><div class="lbl">利益</div><div class="lc-gapv ${pf < 0 ? 'neg' : ''}">${signedYen(pf)}</div></div></div>
+      ${r.tradeDone ? '<span class="note ok">✓ 受け取り評価済み。確定待ち</span>' : `<span class="note">受け取り評価待ち${r.soldAt ? `(${esc(r.soldAt)} に売れた)` : ''}</span>`}`;
+  }
   const price = listPriceOf(r), souba = nowSouba(r);
   if (price > 0) {
     return `<div class="lc-main"><div><div class="lbl">出品価格</div><div class="lc-price">${fmt(price)}</div>${listPriceYOf(r) !== price ? `<div class="lbl">Yahoo!フリマ ${fmt(listPriceYOf(r))}</div>` : ''}</div>${gapHtml(price, souba)}</div>
@@ -704,13 +713,14 @@ function priceBlockHtml(r) {
     ${cand > 0 ? `<div class="cand-lbl">候補の ${fmt(cand)} で売れたら</div>${profitCells(cand, r, 'cand')}` : ''}${notesHtml(r)}`;
 }
 function rowHtml(r) {
-  const price = listPriceOf(r), souba = nowSouba(r), d = stockDays(r);
+  const sold = isSoldWaiting(r);
+  const price = sold ? soldPriceOf(r) : listPriceOf(r), souba = nowSouba(r), d = stockDays(r);
   const p = price || (souba ? priceCandidates(souba)[0] : 0);
-  const pm = p > 0 ? profitAt(p, r, 'メルカリ') : null;
+  const pm = p > 0 ? profitAt(p, r, sold ? (r.soldChannel || 'メルカリ') : 'メルカリ') : null;
   return `<div class="cr${r.status === '出品中' ? ' is-listed' : ''}" role="button" tabindex="0" data-fn="openDetail" data-args='["${esc(r.docId)}"]'>
     <span class="lc-no">${esc(r.invId || '–')}</span>
     <div class="cr-main"><div class="lc-model">${esc(r.model)} <span>${esc(r.capacity)}</span></div>
-      <div class="lc-sub">${esc(r.status || '–')} ・<span class="days ${d.cls}" title="${d.label}${d.days}日">${d.days}日</span>${checkReasons(r).length ? '<span class="cr-warn">⚠ 要チェック</span>' : ''}</div></div>
+      <div class="lc-sub">${esc(r.status || '–')} ・<span class="days ${d.cls}" title="${d.label}${d.days}日">${d.days}日</span>${checkReasons(r).length ? '<span class="cr-warn">⚠ 要チェック</span>' : ''}${r.tradeDone ? '<span class="cr-ok">✓ 確定待ち</span>' : ''}</div></div>
     <div class="cr-r"><div class="cr-price ${price > 0 ? '' : 'none'}">${price > 0 ? fmt(price) : '値段まだ'}</div>
       ${pm != null ? `<div class="cr-pf ${pm < 0 ? 'neg' : ''}">${price > 0 ? '' : '候補 '}${signedYen(pm)}</div>` : ''}</div>
   </div>`;
@@ -749,6 +759,7 @@ function renderHome() {
   const list = [...zaikoList].sort((a, b) => (Number(a.invId) || 0) - (Number(b.invId) || 0));
   const priced = list.filter(r => listPriceOf(r) > 0);
   const need = list.filter(r => checkReasons(r).length > 0);
+  const doneWait = list.filter(r => r.status === '発送中' && r.tradeDone);
   const groups = { all: list, check: need, unpriced: list.filter(r => listPriceOf(r) <= 0) };
   const chipDefs = [['all', 'すべて']];
   if (need.length) chipDefs.push(['check', '要チェック']);
@@ -772,6 +783,7 @@ function renderHome() {
       <div class="hero-stat"><b>${groups.unpriced.length}台</b><span>値段まだ</span></div>
       <div class="hero-stat"><b>${avgDays}日</b><span>仕入れから平均</span></div>
     </div>
+    ${doneWait.length && homeFilter !== 'st:発送中' ? `<button class="hero-alert ok" data-fn="setHomeFilter" data-args='["st:発送中"]'><span>✓ 受け取り評価が済んで、確定待ちが${doneWait.length}台あります</span><i>見る ›</i></button>` : ''}
     ${need.length && homeFilter !== 'check' ? `<button class="hero-alert" data-fn="setHomeFilter" data-args='["check"]'><span>⚠ 見直したほうがいい在庫が${need.length}台あります</span><i>見る ›</i></button>` : ''}
   </div>`;
   const chips = `<div class="chips">${chipDefs.map(([k, l]) =>
@@ -823,6 +835,7 @@ function nextStep(status) {
   if (status === '待ち')     return {to: '到着済み', label: '届いたので「到着済み」にする'};
   if (status === '到着済み') return {to: '検品済み', label: '検品したので「検品済み」にする'};
   if (status === '検品済み' || status === '未出品') return {to: '出品中', label: '出品したので「出品中」にする'};
+  if (status === '出品中') return {to: '発送中', label: '売れて発送したので「発送中」にする'};
   return null;
 }
 function localDateStr() { const n = new Date(); return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`; }
@@ -851,13 +864,15 @@ function detailHtml(r) {
   const price = listPriceOf(r), souba = nowSouba(r), next = nextStep(r.status);
   const nextBtn = next
     ? `<button class="next-btn" data-fn="advanceStatus">${next.label}</button>`
-    : `<button class="next-btn" data-fn="detailAction" data-args='["sell"]'>売れたので記録する</button>`;
+    : `<button class="next-btn" data-fn="detailAction" data-args='["sell"]'>${r.tradeDone ? '取引完了。確定して売上に記録する' : r.status === '発送中' ? '受け取り評価されたので確定する' : '売れたので記録する'}</button>`;
   // 値段が決まっていれば「今の値段から○円下げたら」の利益を、まだなら相場からの値段候補を出す。
   // 各セルは「利益」と「その時の値段」。メルカリとYahoo!で値段が違う時はそれぞれの値段から下げる。
   const priceY = listPriceYOf(r);
   const cell = (p, ch) => { const v = profitAt(p, r, ch); return `<span class="sim-c"><b class="${v < 0 ? 'neg' : ''}">${signedYen(v)}</b><small>${fmt(p)}で売れたら</small></span>`; };
   let sim = '';
-  if (price > 0) {
+  if (isSoldWaiting(r)) {
+    sim = '';   // 売れた後は値下げの表はいらない
+  } else if (price > 0) {
     sim = `<div class="d-sec"><h4>値下げしたら、利益はいくら?</h4>
     <div class="sim"><span class="h">下げる額</span><span class="h">メルカリ</span><span class="h">Yahoo!</span>
     ${[1000, 2000, 3000].map(c => `<span>${c.toLocaleString()}円下げ</span>${cell(price - c, 'メルカリ')}${cell(priceY - c, 'Yahoo!フリマ')}`).join('')}</div>
@@ -1102,7 +1117,6 @@ window.openModal = function(docId, status, sellMode) {
   document.getElementById('modal-listing-url').value = (!sellMode && item?.listingUrl) ? item.listingUrl : '';
   document.getElementById('modal-listing-url-area').style.display = (!sellMode && status === '出品中') ? 'block' : 'none';
   document.getElementById('modal-sell-price').value = '';
-  document.getElementById('modal-account').value = 'たいれん';
   document.getElementById('modal-channel').value = 'メルカリ';
   if (sellMode) {
     if (item) {
@@ -1140,7 +1154,9 @@ window.openModal = function(docId, status, sellMode) {
       document.getElementById(id).oninput = calcModalProfit;
     });
     document.getElementById('modal-profit-preview').style.display = 'block';
-    if (listFor('メルカリ') > 0) { spEl.value = String(listFor('メルカリ')); autoPrice = spEl.value; spEl.oninput(); }
+    if (item && ['メルカリ', 'Yahoo!フリマ'].includes(item.soldChannel)) document.getElementById('modal-channel').value = item.soldChannel;
+    const firstPrice = item && soldPriceOf(item) > 0 ? soldPriceOf(item) : listFor(document.getElementById('modal-channel').value);
+    if (firstPrice > 0) { spEl.value = String(firstPrice); autoPrice = soldPriceOf(item || {}) > 0 ? '' : spEl.value; spEl.oninput(); }
     calcModalProfit();
   }
   document.getElementById('statusModal').classList.add('show');
@@ -1155,7 +1171,7 @@ window.applyStatus = async function() {
   closeModal();
   if (isSellMode) {
     const sellPrice = Number(document.getElementById('modal-sell-price').value);
-    const account   = document.getElementById('modal-account').value;
+    const account   = 'たいれん';   // 出品アカウントは1つだけになった(2026-11-18)
     const channel   = document.getElementById('modal-channel').value;
     if (!sellPrice || sellPrice <= 0) { showToast('⚠️ 売却価格を入力してください'); return; }
     const battery      = Number(document.getElementById('modal-battery').value)       || 0;

@@ -116,10 +116,23 @@ a{color:var(--accent);}
 .days.warn{color:var(--warn-ink);font-weight:800;}
 .days.danger{color:var(--crit-ink);font-weight:800;}
 .badge{flex-shrink:0;font-size:11px;padding:4px 10px;border-radius:999px;font-weight:700;white-space:nowrap;background:var(--chip-bg);color:var(--ink-2);}
-.badge-到着済み{background:var(--st1-bg);color:var(--st1-ink);}
-.badge-検品済み{background:var(--st2-bg);color:var(--st2-ink);}
-.badge-出品中{background:var(--accent-weak);color:var(--accent-ink);}
-.badge-発送中{background:var(--st4-bg);color:var(--st4-ink);}
+.todo-tag{flex-shrink:0;font-size:11.5px;padding:4px 10px;border-radius:999px;font-weight:800;white-space:nowrap;}
+.todo-tag.ship{background:var(--warn-weak);color:var(--warn-ink);}
+.todo-tag.done{background:var(--good-weak);color:var(--good-ink);}
+.lc.todo-ship{box-shadow:inset 4px 0 0 var(--warn),var(--shadow);}
+.lc.todo-done{box-shadow:inset 4px 0 0 var(--good-ink),var(--shadow);}
+.cr.todo-ship,.cr.todo-done{margin:0 -14px;padding-left:14px;padding-right:14px;}
+.cr.todo-ship{box-shadow:inset 4px 0 0 var(--warn);}
+.cr.todo-done{box-shadow:inset 4px 0 0 var(--good-ink);}
+.cr .todo-tag{padding:1px 8px;font-size:11px;margin-right:4px;}
+.sec-h{display:flex;justify-content:space-between;align-items:baseline;margin:16px 4px 8px;font-size:13px;font-weight:800;color:var(--ink-2);}
+.sec-h i{font-style:normal;color:var(--muted);margin-left:4px;}
+.sec-h small{font-size:11.5px;font-weight:600;color:var(--muted);}
+.sec-none{font-size:12.5px;color:var(--muted);padding:2px 4px 6px;}
+.cl.dim{background:transparent;box-shadow:none;border:1px solid var(--line);}
+.cl.dim .cr{padding:8px 0;}
+.cl.dim .lc-model{font-size:13.5px;font-weight:600;color:var(--ink-2);}
+.cl.dim .cr-price{font-size:13px;font-weight:700;color:var(--ink-2);}
 .lc-main{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin-top:12px;}
 .lbl{font-size:11px;color:var(--muted);font-weight:600;}
 .lc-price{font-size:24px;font-weight:800;letter-spacing:-.01em;line-height:1.2;}
@@ -641,6 +654,21 @@ function listPriceYOf(r) { return Number(r.listPriceY) || listPriceOf(r); }   //
 // 売れた値段・販売先(見回りスキル iphone-sales-patrol が「発送中」にする時に書く)。tradeDone は相手の受け取り評価まで済んだ印
 function soldPriceOf(r) { return Number(r.soldPrice) || 0; }
 function isSoldWaiting(r) { return r.status === '発送中' && soldPriceOf(r) > 0; }
+// 売れた後どこまで進んだか。見回り(iphone-sales-patrol)が tradeStep に書く: pay=購入者の支払い待ち / ship=発送待ち / eval=受け取り評価待ち。
+// 書いていない発送中は「発送した後」(評価待ち)として扱う。tradeDone は評価まで済んだ印
+function tradeStepOf(r) { return r.tradeDone ? 'done' : (r.tradeStep || 'eval'); }
+const STEP_LABEL = {pay: '購入者の支払い待ち', ship: '支払い済み。発送する', eval: '受け取り評価待ち', done: '受け取り評価済み。確定待ち'};
+// 在庫画面のまとまり(やること/出品中/準備中/売れて相手待ち)。色を付けるのは「やること」だけ
+function todoOf(r) {
+  if (r.status !== '発送中') return null;
+  const s = tradeStepOf(r);
+  return s === 'ship' ? {cls: 'ship', label: '発送する'} : s === 'done' ? {cls: 'done', label: '確定する'} : null;
+}
+function homeGroupOf(r) {
+  if (r.status === '発送中') return todoOf(r) ? 'todo' : 'wait';
+  return r.status === '出品中' ? 'listed' : 'prep';
+}
+const HOME_SECTIONS = [['todo', 'やること', ''], ['listed', '出品中', '売れるのを待つ'], ['prep', '準備中', '写真・出品の前'], ['wait', '売れて相手待ち', '何もしなくていい']];
 function nowSouba(r) {
   const f = soubaData.find(s => s.model === r.model && s.capacity === r.capacity);
   return Number(f?.souba) || Number(r.souba) || 0;
@@ -701,14 +729,14 @@ function headHtml(r, trailing) {
   return `<div class="lc-head"><span class="lc-no">${esc(r.invId || '–')}</span>
     <div class="lc-name"><div class="lc-model">${esc(r.model)} <span>${esc(r.capacity)}</span></div>
       <div class="lc-sub">${d.label}<span class="days ${d.cls}">${d.days}日</span></div></div>
-    <span class="badge badge-${esc(r.status)}">${esc(r.status || '–')}</span>${trailing || ''}</div>`;
+    ${todoOf(r) ? `<span class="todo-tag ${todoOf(r).cls}">${todoOf(r).label}</span>` : `<span class="badge">${esc(r.status || '–')}</span>`}${trailing || ''}</div>`;
 }
 function priceBlockHtml(r) {
   if (isSoldWaiting(r)) {
     const sp = soldPriceOf(r), ch = r.soldChannel || 'メルカリ', pf = profitAt(sp, r, ch);
     return `<div class="lc-main"><div><div class="lbl">売れた値段${channelChip(ch)}</div><div class="lc-price">${fmt(sp)}</div></div>
       <div class="lc-gap"><div class="lbl">利益</div><div class="lc-gapv ${pf < 0 ? 'neg' : ''}">${signedYen(pf)}</div></div></div>
-      ${r.tradeDone ? '<span class="note ok">✓ 受け取り評価済み。確定待ち</span>' : `<span class="note">受け取り評価待ち${r.soldAt ? `(${esc(r.soldAt)} に売れた)` : ''}</span>`}`;
+      ${r.tradeDone ? '<span class="note ok">✓ 受け取り評価済み。確定待ち</span>' : `<span class="note ${tradeStepOf(r) === 'ship' ? 'warn' : ''}">${STEP_LABEL[tradeStepOf(r)]}${r.soldAt ? `(${esc(r.soldAt)} に売れた)` : ''}</span>`}`;
   }
   const price = listPriceOf(r), souba = nowSouba(r);
   if (price > 0) {
@@ -725,16 +753,19 @@ function rowHtml(r) {
   const price = sold ? soldPriceOf(r) : listPriceOf(r), souba = nowSouba(r), d = stockDays(r);
   const p = price || (souba ? priceCandidates(souba)[0] : 0);
   const pm = p > 0 ? profitAt(p, r, sold ? (r.soldChannel || 'メルカリ') : 'メルカリ') : null;
-  return `<div class="cr${r.status === '出品中' ? ' is-listed' : ''}" role="button" tabindex="0" data-fn="openDetail" data-args='["${esc(r.docId)}"]'>
+  const t = todoOf(r);
+  const stLabel = t ? `<span class="todo-tag ${t.cls}">${t.label}</span>` : esc(r.status === '発送中' ? STEP_LABEL[tradeStepOf(r)] : (r.status || '–'));
+  return `<div class="cr${t ? ' todo-' + t.cls : ''}" role="button" tabindex="0" data-fn="openDetail" data-args='["${esc(r.docId)}"]'>
     <span class="lc-no">${esc(r.invId || '–')}</span>
     <div class="cr-main"><div class="lc-model">${esc(r.model)} <span>${esc(r.capacity)}</span></div>
-      <div class="lc-sub">${esc(r.status || '–')} ・<span class="days ${d.cls}" title="${d.label}${d.days}日">${d.days}日</span>${checkReasons(r).length ? '<span class="cr-warn">⚠ 要チェック</span>' : ''}${r.tradeDone ? '<span class="cr-ok">✓ 確定待ち</span>' : ''}</div></div>
+      <div class="lc-sub">${stLabel} ・<span class="days ${d.cls}" title="${d.label}${d.days}日">${d.days}日</span>${checkReasons(r).length ? '<span class="cr-warn">⚠ 要チェック</span>' : ''}</div></div>
     <div class="cr-r"><div class="cr-price ${price > 0 ? '' : 'none'}">${price > 0 ? fmt(price) : '値段まだ'}</div>
       ${pm != null ? `<div class="cr-pf ${pm < 0 ? 'neg' : ''}">${price > 0 ? '' : '候補 '}${signedYen(pm)}</div>` : ''}</div>
   </div>`;
 }
 function cardHtml(r) {
-  return `<div class="lc${r.status === '出品中' ? ' is-listed' : ''}" role="button" tabindex="0" data-fn="openDetail" data-args='["${esc(r.docId)}"]'>${headHtml(r)}${priceBlockHtml(r)}</div>`;
+  const t = todoOf(r);
+  return `<div class="lc${t ? ' todo-' + t.cls : ''}" role="button" tabindex="0" data-fn="openDetail" data-args='["${esc(r.docId)}"]'>${headHtml(r)}${priceBlockHtml(r)}</div>`;
 }
 
 window.loadZaiko = async function() {
@@ -791,14 +822,23 @@ function renderHome() {
       <div class="hero-stat"><b>${groups.unpriced.length}台</b><span>値段まだ</span></div>
       <div class="hero-stat"><b>${avgDays}日</b><span>仕入れから平均</span></div>
     </div>
-    ${doneWait.length && homeFilter !== 'st:発送中' ? `<button class="hero-alert ok" data-fn="setHomeFilter" data-args='["st:発送中"]'><span>✓ 受け取り評価が済んで、確定待ちが${doneWait.length}台あります</span><i>見る ›</i></button>` : ''}
+    ${doneWait.length && homeFilter !== 'st:発送中' && homeFilter !== 'all' ? `<button class="hero-alert ok" data-fn="setHomeFilter" data-args='["st:発送中"]'><span>✓ 受け取り評価が済んで、確定待ちが${doneWait.length}台あります</span><i>見る ›</i></button>` : ''}
     ${need.length && homeFilter !== 'check' ? `<button class="hero-alert" data-fn="setHomeFilter" data-args='["check"]'><span>⚠ 見直したほうがいい在庫が${need.length}台あります</span><i>見る ›</i></button>` : ''}
   </div>`;
   const chips = `<div class="chips">${chipDefs.map(([k, l]) =>
     `<button class="chip ${homeFilter === k ? 'active' : ''} ${k === 'check' ? 'attn' : ''}" data-fn="setHomeFilter" data-args='["${esc(k)}"]'>${esc(l)}<i>${groups[k].length}</i></button>`).join('')}</div>`;
   const shown = groups[homeFilter];
+  const asView = rs => homeView === 'list' ? `<div class="cl">${rs.map(rowHtml).join('')}</div>` : rs.map(cardHtml).join('');
   const body = !shown.length ? emptyHtml('当てはまる在庫はありません')
-    : homeView === 'list' ? `<div class="cl">${shown.map(rowHtml).join('')}</div>` : shown.map(cardHtml).join('');
+    : homeFilter !== 'all' ? asView(shown)
+    : HOME_SECTIONS.map(([key, title, hint]) => {
+        // やることは発送(急ぐ)を確定より先に
+        const rs = list.filter(r => homeGroupOf(r) === key).sort((a, b) => key === 'todo' ? (todoOf(a).cls === 'ship' ? 0 : 1) - (todoOf(b).cls === 'ship' ? 0 : 1) : 0);
+        if (!rs.length && key !== 'todo') return '';
+        const head = `<div class="sec-h"><span>${title}<i>${rs.length}</i></span>${hint ? `<small>${hint}</small>` : ''}</div>`;
+        if (!rs.length) return head + '<div class="sec-none">今やることはありません</div>';
+        return head + (key === 'prep' || key === 'wait' ? `<div class="cl dim">${rs.map(rowHtml).join('')}</div>` : asView(rs));
+      }).join('');
   el.innerHTML = hero + chips + body;
 }
 // 別のアプリから戻ってきた時、前の読み込みから1分以上たっていたら読み直す
